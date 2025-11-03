@@ -149,3 +149,7 @@ Thumbs.db
 
 # JetBrains IDEs
 .idea/
+
+# Claude Code local files
+.claude/pw/
+.claude/settings.local.json
