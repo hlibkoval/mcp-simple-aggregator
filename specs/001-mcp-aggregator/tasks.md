@@ -74,7 +74,7 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### US1: Config Parsing Tests (TDD - Tests First)
 
-- [ ] T023 [US1] Write test: Parse valid MCP config JSON in tests/unit/config.test.ts
+- [X] T023 [US1] Write test: Parse valid MCP config JSON in tests/unit/config.test.ts
 - [ ] T024 [P] [US1] Write test: Reject config missing mcpServers field in tests/unit/config.test.ts
 - [ ] T025 [P] [US1] Write test: Reject config with invalid JSON syntax in tests/unit/config.test.ts
 - [ ] T026 [P] [US1] Write test: Reject server config missing command field in tests/unit/config.test.ts
@@ -83,16 +83,16 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### US1: Config Parsing Implementation
 
-- [ ] T029 [US1] Implement readConfigFile() to read JSON from file path in src/config.ts
-- [ ] T030 [US1] Implement parseConfig() to parse and validate config structure in src/config.ts
-- [ ] T031 [US1] Implement validateConfig() with detailed error messages in src/config.ts
-- [ ] T032 [US1] Add ConfigError throwing for validation failures in src/config.ts
+- [X] T029 [US1] Implement readConfigFile() to read JSON from file path in src/config.ts
+- [X] T030 [US1] Implement parseConfig() to parse and validate config structure in src/config.ts
+- [X] T031 [US1] Implement validateConfig() with detailed error messages in src/config.ts
+- [X] T032 [US1] Add ConfigError throwing for validation failures in src/config.ts
 
 **Checkpoint**: Run tests T023-T028 - all should pass.
 
 ### US1: Environment Variable Expansion Tests (TDD - Tests First)
 
-- [ ] T033 [US1] Write test: Expand ${VAR} syntax in tests/unit/env-expansion.test.ts
+- [X] T033 [US1] Write test: Expand ${VAR} syntax in tests/unit/env-expansion.test.ts
 - [ ] T034 [P] [US1] Write test: Expand $VAR syntax in tests/unit/env-expansion.test.ts
 - [ ] T035 [P] [US1] Write test: Fail on missing environment variable in tests/unit/env-expansion.test.ts
 - [ ] T036 [P] [US1] Write test: Recursively expand vars in nested config in tests/unit/env-expansion.test.ts
@@ -101,15 +101,15 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### US1: Environment Variable Expansion Implementation
 
-- [ ] T039 [US1] Implement expandEnvVar() with regex replacement in src/config.ts
-- [ ] T040 [US1] Implement expandConfigEnvVars() for recursive expansion in src/config.ts
-- [ ] T041 [US1] Add error handling for missing variables with variable name in error in src/config.ts
+- [X] T039 [US1] Implement expandEnvVar() with regex replacement in src/config.ts
+- [X] T040 [US1] Implement expandConfigEnvVars() for recursive expansion in src/config.ts
+- [X] T041 [US1] Add error handling for missing variables with variable name in error in src/config.ts
 
 **Checkpoint**: Run tests T033-T038 - all should pass.
 
 ### US1: Child Server Manager Tests (TDD - Tests First)
 
-- [ ] T042 [US1] Write test: Initialize single child server with valid config in tests/unit/child-manager.test.ts
+- [X] T042 [US1] Write test: Initialize single child server with valid config in tests/unit/child-manager.test.ts
 - [ ] T043 [P] [US1] Write test: Initialize multiple child servers in parallel in tests/unit/child-manager.test.ts
 - [ ] T044 [P] [US1] Write test: Fail startup if child server command not found in tests/unit/child-manager.test.ts
 - [ ] T045 [P] [US1] Write test: Fail startup if child server doesn't respond in tests/unit/child-manager.test.ts
@@ -118,38 +118,38 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### US1: Child Server Manager Implementation
 
-- [ ] T048 [US1] Implement createChildClient() using StdioClientTransport in src/child-manager.ts
-- [ ] T049 [US1] Implement connectToChild() to spawn and connect to single server in src/child-manager.ts
-- [ ] T050 [US1] Implement initializeChildren() to spawn all servers from config in src/child-manager.ts
-- [ ] T051 [US1] Add child server health check with listTools() call in src/child-manager.ts
-- [ ] T052 [US1] Add error handling with ChildServerError for failures in src/child-manager.ts
-- [ ] T053 [US1] Implement fail-fast startup behavior (exit on any child failure) in src/child-manager.ts
+- [X] T048 [US1] Implement createChildClient() using StdioClientTransport in src/child-manager.ts
+- [X] T049 [US1] Implement connectToChild() to spawn and connect to single server in src/child-manager.ts
+- [X] T050 [US1] Implement initializeChildren() to spawn all servers from config in src/child-manager.ts
+- [X] T051 [US1] Add child server health check with listTools() call in src/child-manager.ts
+- [X] T052 [US1] Add error handling with ChildServerError for failures in src/child-manager.ts
+- [X] T053 [US1] Implement fail-fast startup behavior (exit on any child failure) in src/child-manager.ts
 
 **Checkpoint**: Run tests T042-T047 - all should pass.
 
 ### US1: CLI Interface Tests (TDD - Tests First)
 
-- [ ] T054 [US1] Write test: Parse --config argument in tests/unit/cli.test.ts
+- [X] T054 [US1] Write test: Parse --config argument in tests/unit/cli.test.ts
 - [ ] T055 [P] [US1] Write test: Reject missing --config argument in tests/unit/cli.test.ts
 - [ ] T056 [P] [US1] Write test: Parse optional --debug flag in tests/unit/cli.test.ts
 - [ ] T057 [P] [US1] Write test: Show help message for --help flag in tests/unit/cli.test.ts
 
 ### US1: CLI Interface Implementation
 
-- [ ] T058 [US1] Implement parseCliArgs() for argument parsing in src/index.ts
-- [ ] T059 [US1] Implement validateCliArgs() to ensure config path provided in src/index.ts
-- [ ] T060 [US1] Add help text with usage examples in src/index.ts
-- [ ] T061 [US1] Wire together config parsing, env expansion, child initialization in src/index.ts
+- [X] T058 [US1] Implement parseCliArgs() for argument parsing in src/index.ts
+- [X] T059 [US1] Implement validateCliArgs() to ensure config path provided in src/index.ts
+- [X] T060 [US1] Add help text with usage examples in src/index.ts
+- [X] T061 [US1] Wire together config parsing, env expansion, child initialization in src/index.ts
 
 **Checkpoint**: Run tests T054-T057 - all should pass.
 
 ### US1: Integration Tests
 
-- [ ] T062 [US1] Write integration test: Start with valid config, verify all children spawn in tests/integration/startup.test.ts
-- [ ] T063 [US1] Write integration test: Fail startup with missing config file in tests/integration/startup.test.ts
-- [ ] T064 [US1] Write integration test: Fail startup with invalid JSON in tests/integration/startup.test.ts
-- [ ] T065 [US1] Write integration test: Fail startup with missing env var in tests/integration/startup.test.ts
-- [ ] T066 [US1] Write integration test: Fail startup with unreachable child server in tests/integration/startup.test.ts
+- [X] T062 [US1] Write integration test: Start with valid config, verify all children spawn in tests/integration/startup.test.ts
+- [X] T063 [US1] Write integration test: Fail startup with missing config file in tests/integration/startup.test.ts
+- [X] T064 [US1] Write integration test: Fail startup with invalid JSON in tests/integration/startup.test.ts
+- [X] T065 [US1] Write integration test: Fail startup with missing env var in tests/integration/startup.test.ts
+- [X] T066 [US1] Write integration test: Fail startup with unreachable child server in tests/integration/startup.test.ts
 
 **US1 Complete**: User can configure and start aggregator with proper validation.
 
