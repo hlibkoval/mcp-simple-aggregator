@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/user/Documents"
+      ],
+      "env": {
+        "LOG_LEVEL": "info"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "postgres": {
+      "command": "node",
+      "args": [
+        "/path/to/postgres-mcp-server/index.js"
+      ],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}",
+        "PG_POOL_SIZE": "10"
+      }
+    }
+  }
+}
