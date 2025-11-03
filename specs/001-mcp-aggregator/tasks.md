@@ -75,11 +75,11 @@ These tasks create the foundation that all user stories depend on. Following TDD
 ### US1: Config Parsing Tests (TDD - Tests First)
 
 - [X] T023 [US1] Write test: Parse valid MCP config JSON in tests/unit/config.test.ts
-- [ ] T024 [P] [US1] Write test: Reject config missing mcpServers field in tests/unit/config.test.ts
-- [ ] T025 [P] [US1] Write test: Reject config with invalid JSON syntax in tests/unit/config.test.ts
-- [ ] T026 [P] [US1] Write test: Reject server config missing command field in tests/unit/config.test.ts
-- [ ] T027 [P] [US1] Write test: Accept server config with optional args and env in tests/unit/config.test.ts
-- [ ] T028 [P] [US1] Write test: Handle multiple servers in config in tests/unit/config.test.ts
+- [X] T024 [P] [US1] Write test: Reject config missing mcpServers field in tests/unit/config.test.ts
+- [X] T025 [P] [US1] Write test: Reject config with invalid JSON syntax in tests/unit/config.test.ts
+- [X] T026 [P] [US1] Write test: Reject server config missing command field in tests/unit/config.test.ts
+- [X] T027 [P] [US1] Write test: Accept server config with optional args and env in tests/unit/config.test.ts
+- [X] T028 [P] [US1] Write test: Handle multiple servers in config in tests/unit/config.test.ts
 
 ### US1: Config Parsing Implementation
 
@@ -93,11 +93,11 @@ These tasks create the foundation that all user stories depend on. Following TDD
 ### US1: Environment Variable Expansion Tests (TDD - Tests First)
 
 - [X] T033 [US1] Write test: Expand ${VAR} syntax in tests/unit/env-expansion.test.ts
-- [ ] T034 [P] [US1] Write test: Expand $VAR syntax in tests/unit/env-expansion.test.ts
-- [ ] T035 [P] [US1] Write test: Fail on missing environment variable in tests/unit/env-expansion.test.ts
-- [ ] T036 [P] [US1] Write test: Recursively expand vars in nested config in tests/unit/env-expansion.test.ts
-- [ ] T037 [P] [US1] Write test: Preserve non-string values during expansion in tests/unit/env-expansion.test.ts
-- [ ] T038 [P] [US1] Write test: Identify specific missing variable name in error in tests/unit/env-expansion.test.ts
+- [X] T034 [P] [US1] Write test: Expand $VAR syntax in tests/unit/env-expansion.test.ts
+- [X] T035 [P] [US1] Write test: Fail on missing environment variable in tests/unit/env-expansion.test.ts
+- [X] T036 [P] [US1] Write test: Recursively expand vars in nested config in tests/unit/env-expansion.test.ts
+- [X] T037 [P] [US1] Write test: Preserve non-string values during expansion in tests/unit/env-expansion.test.ts
+- [X] T038 [P] [US1] Write test: Identify specific missing variable name in error in tests/unit/env-expansion.test.ts
 
 ### US1: Environment Variable Expansion Implementation
 
@@ -110,11 +110,11 @@ These tasks create the foundation that all user stories depend on. Following TDD
 ### US1: Child Server Manager Tests (TDD - Tests First)
 
 - [X] T042 [US1] Write test: Initialize single child server with valid config in tests/unit/child-manager.test.ts
-- [ ] T043 [P] [US1] Write test: Initialize multiple child servers in parallel in tests/unit/child-manager.test.ts
-- [ ] T044 [P] [US1] Write test: Fail startup if child server command not found in tests/unit/child-manager.test.ts
-- [ ] T045 [P] [US1] Write test: Fail startup if child server doesn't respond in tests/unit/child-manager.test.ts
-- [ ] T046 [P] [US1] Write test: Pass environment variables to child process in tests/unit/child-manager.test.ts
-- [ ] T047 [P] [US1] Write test: Report specific server that failed with diagnostic info in tests/unit/child-manager.test.ts
+- [X] T043 [P] [US1] Write test: Initialize multiple child servers in parallel in tests/unit/child-manager.test.ts
+- [X] T044 [P] [US1] Write test: Fail startup if child server command not found in tests/unit/child-manager.test.ts
+- [X] T045 [P] [US1] Write test: Fail startup if child server doesn't respond in tests/unit/child-manager.test.ts
+- [X] T046 [P] [US1] Write test: Pass environment variables to child process in tests/unit/child-manager.test.ts
+- [X] T047 [P] [US1] Write test: Report specific server that failed with diagnostic info in tests/unit/child-manager.test.ts
 
 ### US1: Child Server Manager Implementation
 
@@ -130,9 +130,9 @@ These tasks create the foundation that all user stories depend on. Following TDD
 ### US1: CLI Interface Tests (TDD - Tests First)
 
 - [X] T054 [US1] Write test: Parse --config argument in tests/unit/cli.test.ts
-- [ ] T055 [P] [US1] Write test: Reject missing --config argument in tests/unit/cli.test.ts
-- [ ] T056 [P] [US1] Write test: Parse optional --debug flag in tests/unit/cli.test.ts
-- [ ] T057 [P] [US1] Write test: Show help message for --help flag in tests/unit/cli.test.ts
+- [X] T055 [P] [US1] Write test: Reject missing --config argument in tests/unit/cli.test.ts
+- [X] T056 [P] [US1] Write test: Parse optional --debug flag in tests/unit/cli.test.ts
+- [X] T057 [P] [US1] Write test: Show help message for --help flag in tests/unit/cli.test.ts
 
 ### US1: CLI Interface Implementation
 

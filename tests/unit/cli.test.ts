@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { parseCliArgs, validateCliArgs } from '../../src/index.js';
 
 describe('CLI Argument Parsing', () => {
@@ -32,7 +32,7 @@ describe('CLI Argument Parsing', () => {
     });
   });
 
-  describe('CLI argument validation', () => {
+  describe('T055: Reject missing --config argument', () => {
     it('should accept valid CLI args', () => {
       const args = { configPath: '/path/to/config.json' };
       expect(() => validateCliArgs(args)).not.toThrow();
@@ -44,8 +44,26 @@ describe('CLI Argument Parsing', () => {
       expect(() => validateCliArgs(args)).toThrow(/config.*required/i);
     });
 
+    it('should reject when configPath property is absent', () => {
+      const args = {} as any;
+      expect(() => validateCliArgs(args)).toThrow();
+      expect(() => validateCliArgs(args)).toThrow(/config.*required/i);
+    });
+
     it('should reject empty configPath', () => {
       const args = { configPath: '' };
+      expect(() => validateCliArgs(args)).toThrow();
+      expect(() => validateCliArgs(args)).toThrow(/config.*required/i);
+    });
+
+    it('should reject whitespace-only configPath', () => {
+      const args = { configPath: '   ' };
+      expect(() => validateCliArgs(args)).toThrow();
+      expect(() => validateCliArgs(args)).toThrow(/config.*required/i);
+    });
+
+    it('should reject null configPath', () => {
+      const args = { configPath: null as any };
       expect(() => validateCliArgs(args)).toThrow();
       expect(() => validateCliArgs(args)).toThrow(/config.*required/i);
     });
@@ -87,6 +105,45 @@ describe('CLI Argument Parsing', () => {
 
       expect(parsed.name).toBe('mcp-simple-aggregator');
       expect(parsed.version).toBe('1.0.0');
+    });
+  });
+
+  describe('T057: Help message display', () => {
+    it('should display help message for --help flag', () => {
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+
+      const args = ['--help'];
+      parseCliArgs(args);
+
+      expect(consoleLogSpy).toHaveBeenCalled();
+      const helpOutput = consoleLogSpy.mock.calls.map(call => call[0]).join('');
+      expect(helpOutput).toContain('MCP Simple Aggregator');
+      expect(helpOutput).toContain('Usage:');
+      expect(helpOutput).toContain('--config <path>');
+      expect(helpOutput).toContain('--debug');
+      expect(helpOutput).toContain('--help');
+      expect(processExitSpy).toHaveBeenCalledWith(0);
+
+      consoleLogSpy.mockRestore();
+      processExitSpy.mockRestore();
+    });
+
+    it('should display help message for -h flag', () => {
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+
+      const args = ['-h'];
+      parseCliArgs(args);
+
+      expect(consoleLogSpy).toHaveBeenCalled();
+      const helpOutput = consoleLogSpy.mock.calls.map(call => call[0]).join('');
+      expect(helpOutput).toContain('MCP Simple Aggregator');
+      expect(helpOutput).toContain('Usage:');
+      expect(processExitSpy).toHaveBeenCalledWith(0);
+
+      consoleLogSpy.mockRestore();
+      processExitSpy.mockRestore();
     });
   });
 });
