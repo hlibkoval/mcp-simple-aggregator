@@ -49,6 +49,15 @@ export function parseCliArgs(argv: string[] = process.argv.slice(2)): CliArgs {
       if (nextArg) {
         args.version = nextArg;
       }
+    } else if (arg === '--separator') {
+      // T025: Parse --separator argument
+      const nextArg = argv[++i];
+      if (nextArg) {
+        args.separator = nextArg;
+      }
+    } else if (arg.startsWith('--separator=')) {
+      // T025: Parse --separator=value format
+      args.separator = arg.substring('--separator='.length);
     } else if (arg === '--help' || arg === '-h') {
       printHelp();
       process.exit(0);
@@ -74,7 +83,24 @@ export function validateCliArgs(args: Partial<CliArgs>): void {
 }
 
 /**
- * T060: Print help message with usage examples
+ * T042-T045: Validate separator string
+ * @param separator - Separator string to validate
+ * @throws Error if separator is invalid
+ */
+export function validateSeparator(separator: string): void {
+  // T042 & T044: Empty string check
+  if (separator === '') {
+    throw new Error('Separator cannot be empty. Use --separator <chars> to specify a separator (default: ":")');
+  }
+
+  // T043 & T045: Whitespace check
+  if (/\s/.test(separator)) {
+    throw new Error('Separator cannot contain whitespace. Use non-whitespace characters like "__" or "-"');
+  }
+}
+
+/**
+ * T060 & T032: Print help message with usage examples
  */
 function printHelp(): void {
   console.log(`
@@ -87,6 +113,8 @@ Required Arguments:
   --config <path>       Path to MCP configuration JSON file
 
 Optional Arguments:
+  --separator <chars>   Separator for tool namespacing (default: ":")
+                        Examples: "__", ".", "::", "-"
   --debug               Enable debug logging
   --log-file <path>     Path to log file (default: /tmp/mcp-aggregator-{pid}.log)
   --name <name>         Server name (default: mcp-simple-aggregator)
@@ -94,14 +122,17 @@ Optional Arguments:
   --help, -h            Show this help message
 
 Examples:
-  # Basic usage
+  # Basic usage (default ':' separator)
   mcp-simple-aggregator --config /path/to/config.json
+
+  # Custom separator
+  mcp-simple-aggregator --config /path/to/config.json --separator "__"
 
   # With debug logging
   mcp-simple-aggregator --config /path/to/config.json --debug
 
-  # With custom log file
-  mcp-simple-aggregator --config /path/to/config.json --debug --log-file /var/log/mcp.log
+  # Custom separator and log file
+  mcp-simple-aggregator --config config.json --separator "." --debug --log-file /var/log/mcp.log
 
   # Custom server name
   mcp-simple-aggregator --config config.json --name my-aggregator
@@ -134,8 +165,19 @@ async function main() {
     const args = parseCliArgs();
     validateCliArgs(args);
 
+    // T006: Set default separator (default to ':' when not provided)
+    const separator = args.separator || ':';
+
+    // T046: Validate separator when provided via CLI
+    if (args.separator) {
+      validateSeparator(args.separator);
+    }
+
     // Set debug mode for logger
     setDebugMode(args.debug || false);
+
+    // T048: Debug logging for separator value
+    logDebug(`[DEBUG] Using separator: "${separator}"`);
 
     // Initialize log file if debug mode is enabled
     if (args.debug) {
@@ -168,7 +210,8 @@ async function main() {
     const childClients = new Map(
       Array.from(children.entries()).map(([key, child]) => [key, child.client])
     );
-    const registry = await buildToolRegistry(childClients);
+    // T012: Pass separator parameter to buildToolRegistry
+    const registry = await buildToolRegistry(childClients, separator);
 
     logDebug(`[DEBUG] Registry built with ${registry.size} tools`);
 
@@ -181,7 +224,8 @@ async function main() {
 
     // Setup tool call handler
     logDebug('[DEBUG] Setting up tool call handler...');
-    setupToolCallHandler(server, registry);
+    // T014: Pass separator parameter to setupToolCallHandler
+    setupToolCallHandler(server, registry, separator);
 
     // Setup error handlers for graceful degradation (T109-T112)
     logDebug('[DEBUG] Setting up error handlers...');

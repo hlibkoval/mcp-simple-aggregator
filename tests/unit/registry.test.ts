@@ -469,4 +469,112 @@ describe('Tool Registry', () => {
       expect(entry?.schema.inputSchema.required).toEqual(['query']);
     });
   });
+
+  describe('T003: [US1] buildToolRegistry with default separator', () => {
+    it('should use default colon separator when no separator parameter provided', async () => {
+      const tools: ToolSchema[] = [
+        {
+          name: 'search',
+          description: 'Search tool',
+          inputSchema: { type: 'object' }
+        }
+      ];
+
+      vi.mocked(mockClient1.listTools).mockResolvedValue({ tools });
+
+      const childClients = new Map([['github', mockClient1]]);
+      const registry = await buildToolRegistry(childClients);
+
+      // Should use default colon separator
+      expect(registry.has('github:search')).toBe(true);
+      const entry = lookupTool(registry, 'github:search');
+      expect(entry?.schema.name).toBe('github:search');
+      expect(entry?.originalName).toBe('search');
+    });
+
+    it('should use default colon separator for multiple servers', async () => {
+      const tools1: ToolSchema[] = [
+        { name: 'read_file', description: 'Read file', inputSchema: { type: 'object' } }
+      ];
+      const tools2: ToolSchema[] = [
+        { name: 'query', description: 'Database query', inputSchema: { type: 'object' } }
+      ];
+
+      vi.mocked(mockClient1.listTools).mockResolvedValue({ tools: tools1 });
+      vi.mocked(mockClient2.listTools).mockResolvedValue({ tools: tools2 });
+
+      const childClients = new Map([
+        ['filesystem', mockClient1],
+        ['database', mockClient2]
+      ]);
+      const registry = await buildToolRegistry(childClients);
+
+      // Both should use colon separator
+      expect(registry.has('filesystem:read_file')).toBe(true);
+      expect(registry.has('database:query')).toBe(true);
+    });
+  });
+
+  describe('T019-T020: [US2] addServerTools with custom separator', () => {
+    it('T019: should use custom separator __ for tool prefixing', () => {
+      const registry: ToolRegistry = new Map();
+      const tools: ToolSchema[] = [
+        {
+          name: 'create_issue',
+          description: 'Create issue',
+          inputSchema: { type: 'object' }
+        },
+        {
+          name: 'list_repos',
+          description: 'List repos',
+          inputSchema: { type: 'object' }
+        }
+      ];
+
+      addServerTools(registry, 'github', mockClient1, tools, '__');
+
+      // Should use double underscore separator
+      expect(registry.has('github__create_issue')).toBe(true);
+      expect(registry.has('github__list_repos')).toBe(true);
+
+      // Should NOT use colon
+      expect(registry.has('github:create_issue')).toBe(false);
+
+      const entry = lookupTool(registry, 'github__create_issue');
+      expect(entry?.schema.name).toBe('github__create_issue');
+      expect(entry?.originalName).toBe('create_issue');
+    });
+
+    it('T020: should use multi-character separator :: for tool prefixing', () => {
+      const registry: ToolRegistry = new Map();
+      const tools: ToolSchema[] = [
+        {
+          name: 'read_file',
+          description: 'Read file',
+          inputSchema: { type: 'object' }
+        }
+      ];
+
+      addServerTools(registry, 'filesystem', mockClient1, tools, '::');
+
+      // Should use double colon separator
+      expect(registry.has('filesystem::read_file')).toBe(true);
+      expect(registry.has('filesystem:read_file')).toBe(false);
+
+      const entry = lookupTool(registry, 'filesystem::read_file');
+      expect(entry?.schema.name).toBe('filesystem::read_file');
+    });
+
+    it('should use dot separator for tool prefixing', () => {
+      const registry: ToolRegistry = new Map();
+      const tools: ToolSchema[] = [
+        { name: 'query', description: 'Query', inputSchema: { type: 'object' } }
+      ];
+
+      addServerTools(registry, 'database', mockClient1, tools, '.');
+
+      expect(registry.has('database.query')).toBe(true);
+      expect(registry.has('database:query')).toBe(false);
+    });
+  });
 });

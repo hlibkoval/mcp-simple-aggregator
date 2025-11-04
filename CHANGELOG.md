@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Configurable tool name separator via `--separator` CLI argument
+  - Allows customizing the separator used for tool namespacing (default: `:`)
+  - Supports single-character separators (`.`, `-`, `_`, etc.)
+  - Supports multi-character separators (`__`, `::`, `->`, etc.)
+  - Examples: `github__create_issue`, `api.get_user`, `db::query`
+  - Backward compatible - defaults to `:` when not specified
+
+### Changed
+- Tool registry now accepts configurable separator parameter
+  - Updated `buildToolRegistry()`, `addServerTools()`, and `removeServerTools()`
+  - All functions maintain backward compatibility with default `:` separator
+- Tool name parsing updated to support multi-character separators
+  - Updated `parseToolPrefix()` to handle separators of any length
+  - Tool call routing preserves custom separator format
+
+### Fixed
+- Added validation for separator argument
+  - Rejects empty string separators with clear error message
+  - Rejects separators containing whitespace (space, tab, newline)
+  - Validates separator before building tool registry
+
 ## [0.0.7] - 2025-11-04
 
 ### Added

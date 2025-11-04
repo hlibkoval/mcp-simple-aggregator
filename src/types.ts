@@ -214,6 +214,9 @@ export interface CliArgs {
 
   /** Optional: Server version for MCP protocol (default: "1.0.0") */
   version?: string;
+
+  /** Optional: Separator character(s) for tool namespacing (default: ":") */
+  separator?: string;
 }
 
 // ============================================================================
