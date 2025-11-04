@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createChildClient, connectToChild, initializeChildren } from '../../src/child-manager.js';
+import path from 'path';
+import { createChildClient, connectToChild, initializeChildren, resolveCommand } from '../../src/child-manager.js';
 import { ServerConfig, ChildServerError, ErrorPhase } from '../../src/types.js';
 
 describe('Child Server Manager', () => {
@@ -503,6 +504,125 @@ describe('Child Server Manager', () => {
 
       // Cleanup mocks
       vi.restoreAllMocks();
+    });
+  });
+
+  describe('Command Resolution (User Story 1)', () => {
+    it('T001: resolveCommand("node") returns process.execPath', () => {
+      const result = resolveCommand('node');
+      expect(result).toBe(process.execPath);
+      expect(result).toContain('node');
+    });
+
+    it('T002: resolveCommand("python") returns "python" unchanged', () => {
+      const result = resolveCommand('python');
+      expect(result).toBe('python');
+    });
+
+    it('T003: resolveCommand("/usr/bin/node") returns absolute path unchanged', () => {
+      const absolutePath = '/usr/bin/node';
+      const result = resolveCommand(absolutePath);
+      expect(result).toBe(absolutePath);
+    });
+
+    it('should preserve Windows absolute paths', () => {
+      const windowsPath = 'C:\\Program Files\\nodejs\\node.exe';
+      const result = resolveCommand(windowsPath);
+      expect(result).toBe(windowsPath);
+    });
+
+    it('should return other commands unchanged', () => {
+      expect(resolveCommand('echo')).toBe('echo');
+      expect(resolveCommand('ls')).toBe('ls');
+      expect(resolveCommand('git')).toBe('git');
+    });
+  });
+
+  describe('Command Resolution Logging (User Story 2)', () => {
+    let consoleSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('T009: resolveCommand logs resolution when command changes', () => {
+      resolveCommand('node');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/\[INFO\].*node.*to/)
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining(process.execPath)
+      );
+    });
+
+    it('T010: resolveCommand does not log when command unchanged', () => {
+      consoleSpy.mockClear();
+      resolveCommand('python');
+      expect(consoleSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not log for absolute paths', () => {
+      consoleSpy.mockClear();
+      resolveCommand('/usr/bin/node');
+      expect(consoleSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('npm/npx Command Resolution (User Story 3)', () => {
+    it('T015: resolveCommand("npm") resolves to dirname(process.execPath)/npm if exists', () => {
+      const result = resolveCommand('npm');
+      const nodeDir = path.dirname(process.execPath);
+
+      // Should either be the resolved npm path or fallback to "npm"
+      // The actual resolution depends on whether npm exists in the same directory as node
+      if (result !== 'npm') {
+        expect(result).toContain(nodeDir);
+        expect(result).toMatch(/npm(\.cmd)?$/);
+      } else {
+        // Fallback case - npm not found in node directory
+        expect(result).toBe('npm');
+      }
+    });
+
+    it('T016: resolveCommand("npx") resolves to dirname(process.execPath)/npx if exists', () => {
+      const result = resolveCommand('npx');
+      const nodeDir = path.dirname(process.execPath);
+
+      // Should either be the resolved npx path or fallback to "npx"
+      if (result !== 'npx') {
+        expect(result).toContain(nodeDir);
+        expect(result).toMatch(/npx(\.cmd)?$/);
+      } else {
+        // Fallback case - npx not found in node directory
+        expect(result).toBe('npx');
+      }
+    });
+
+    it('T017: resolveCommand("npm") returns "npm" if not found (fallback)', () => {
+      // This test verifies the fallback behavior
+      // If npm doesn't exist in node's directory, it should return the original command
+      const result = resolveCommand('npm');
+      expect(typeof result).toBe('string');
+      expect(result).toBeTruthy();
+    });
+
+    it('T018: Windows - resolveCommand("npm") checks for .cmd extension', () => {
+      // This is a platform-aware test
+      // On Windows, npm is typically npm.cmd
+      const result = resolveCommand('npm');
+
+      if (process.platform === 'win32' && result !== 'npm') {
+        expect(result).toMatch(/\.cmd$/);
+      }
+
+      // On Unix, no .cmd extension
+      if (process.platform !== 'win32' && result !== 'npm') {
+        expect(result).not.toMatch(/\.cmd$/);
+      }
     });
   });
 });

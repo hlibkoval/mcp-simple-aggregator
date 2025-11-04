@@ -102,6 +102,46 @@ All tools are prefixed with their server key from the config:
 
 This prevents naming conflicts when multiple servers provide tools with the same name.
 
+### Automatic Command Resolution
+
+The aggregator automatically resolves `node`, `npm`, and `npx` commands to absolute paths to prevent "command not found" errors, especially in environments where these executables are not in the PATH.
+
+**How it works:**
+- When you specify `"command": "node"`, it's automatically resolved to the same Node.js executable running the aggregator (e.g., `/usr/local/bin/node`)
+- When you specify `"command": "npm"` or `"command": "npx"`, the aggregator checks if they exist in the same directory as Node.js
+- If npm/npx are found, they're resolved to their absolute paths (e.g., `/usr/local/bin/npm`)
+- If not found, the original command is used (relying on system PATH)
+
+**Benefits:**
+- ✅ **Version Consistency**: Child servers use the same Node.js version as the aggregator
+- ✅ **Reliability**: Works even when PATH is not configured correctly
+- ✅ **Cross-platform**: Handles Windows `.cmd` extensions automatically
+- ✅ **Transparent**: No configuration changes needed
+
+**Example:**
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "node",  // Automatically resolved to /usr/local/bin/node
+      "args": ["server.js"]
+    }
+  }
+}
+```
+
+**Debugging:** Check the logs to see resolved paths:
+```
+[INFO] Resolved 'node' to '/usr/local/bin/node' for child server 'my-server'
+```
+
+**Override:** To use a specific Node.js version, provide an absolute path:
+```json
+{
+  "command": "/usr/local/bin/node18"  // Absolute paths are never modified
+}
+```
+
 ## Configuration
 
 ### Basic Configuration
