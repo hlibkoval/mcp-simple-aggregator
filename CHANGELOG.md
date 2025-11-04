@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7] - 2025-11-04
+
+### Added
+- File-based debug logging system to prevent JSON-RPC protocol pollution
+  - New `--log-file` CLI option (default: `/tmp/mcp-aggregator-{pid}.log`)
+  - Lazy file creation - only creates log file when first log occurs
+  - Logs written with ISO timestamp format: `{timestamp} [LEVEL] {message}`
+  - Supports `[DEBUG]`, `[INFO]`, and `[ERROR]` log levels
+  - Zero stdout/stderr output in production mode (clean stdio for MCP protocol)
+
+### Changed
+- Debug logging now writes to files instead of stderr
+  - Prevents "Unexpected token" JSON parsing errors in Claude Desktop
+  - Logs only active when `--debug` flag is enabled
+  - Complete stdio isolation for MCP JSON-RPC communication
+- Removed startup `logInfo()` calls that could pollute stdio
+  - Converted to `logDebug()` calls (file-only output)
+  - Server started messages now only in debug log file
+
+### Fixed
+- Fixed Claude Desktop integration errors caused by stderr pollution
+  - Resolved "Unexpected token 'I', "[INFO] Erro"... is not valid JSON" errors
+  - MCP stdio transport now complies with JSON-RPC protocol requirements
+
 ## [0.0.6] - 2025-11-04
 
 ### Changed
@@ -72,7 +96,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI with `--config`, `--debug`, `--name`, `--version` options
 - Standard Claude Desktop config format support
 
-[Unreleased]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.6...HEAD
+[Unreleased]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.7...HEAD
+[0.0.7]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.3...v0.0.4
