@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.5] - 2025-11-04
+
+### Added
+- Automatic GitHub release creation when publishing to npm
+  - GitHub Actions workflow now creates releases with CHANGELOG notes
+  - Release notes extracted from CHANGELOG.md for each version
+  - Includes installation instructions and comparison links
+- CLAUDE.md documentation file for Claude Code guidance
+  - Development workflow with Spec-Kit commands
+  - Build, test, and lint commands
+  - High-level architecture overview
+  - Release process documentation
+
+### Changed
+- Restricted npm publishing to GitHub Actions only
+  - Manual `npm publish` now fails with helpful error message
+  - Enforces consistent releases through CI/CD pipeline
+  - Ensures all releases go through automated quality checks
+
 ## [0.0.4] - 2025-11-04
 
 ### Added
@@ -44,7 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI with `--config`, `--debug`, `--name`, `--version` options
 - Standard Claude Desktop config format support
 
-[Unreleased]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.4...HEAD
+[Unreleased]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.5...HEAD
+[0.0.5]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/hlibkoval/mcp-simple-aggregator/compare/v0.0.1...v0.0.2
