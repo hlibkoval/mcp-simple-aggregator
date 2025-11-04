@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://modelcontextprotocol.io/schemas/claude-desktop-config.json",
+  "title": "Claude Desktop MCP Configuration",
+  "description": "Configuration format for MCP servers in Claude Desktop, compatible with mcp-simple-aggregator",
+  "type": "object",
+  "required": ["mcpServers"],
+  "properties": {
+    "mcpServers": {
+      "type": "object",
+      "description": "Map of server keys to server configurations",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["command"],
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "Command to execute (e.g., 'npx', 'node', '/usr/bin/python')",
+              "minLength": 1,
+              "examples": [
+                "npx",
+                "node",
+                "python",
+                "/usr/local/bin/custom-server"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "description": "Command-line arguments for the server",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "examples": [
+                ["-y", "@modelcontextprotocol/server-filesystem", "/home/user"],
+                ["server.js", "--port", "3000"]
+              ]
+            },
+            "env": {
+              "type": "object",
+              "description": "Environment variables to pass to the server process. Supports $VAR and ${VAR} expansion.",
+              "patternProperties": {
+                "^[A-Z_][A-Z0-9_]*$": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "default": {},
+              "examples": [
+                {
+                  "API_KEY": "${API_KEY}",
+                  "LOG_LEVEL": "info",
+                  "DATABASE_URL": "$DATABASE_URL"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "mcpServers": {
+        "filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/Documents"]
+        }
+      }
+    },
+    {
+      "mcpServers": {
+        "postgres": {
+          "command": "node",
+          "args": ["/path/to/postgres-server.js"],
+          "env": {
+            "DATABASE_URL": "${DATABASE_URL}",
+            "LOG_LEVEL": "debug"
+          }
+        },
+        "github": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-github"],
+          "env": {
+            "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+          }
+        }
+      }
+    }
+  ]
+}

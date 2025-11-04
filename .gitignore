@@ -137,3 +137,19 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# JetBrains IDEs
+.idea/
+
+# Claude Code local files
+.claude/pw/
+.claude/settings.local.json

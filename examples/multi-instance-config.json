@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "fs-home": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/home"
+      ]
+    },
+    "fs-work": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/work"
+      ]
+    },
+    "fs-projects": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/projects"
+      ]
+    }
+  }
+}
