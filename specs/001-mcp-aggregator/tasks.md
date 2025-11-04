@@ -167,47 +167,47 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### US2: Tool Registry Tests (TDD - Tests First)
 
-- [ ] T067 [US2] Write test: Build registry from single child server in tests/unit/registry.test.ts
-- [ ] T068 [P] [US2] Write test: Build registry from multiple child servers in tests/unit/registry.test.ts
-- [ ] T069 [P] [US2] Write test: Prefix tools with serverKey in tests/unit/registry.test.ts
-- [ ] T070 [P] [US2] Write test: Handle duplicate tool names from different servers in tests/unit/registry.test.ts
-- [ ] T071 [P] [US2] Write test: Preserve original tool name for routing in tests/unit/registry.test.ts
-- [ ] T072 [P] [US2] Write test: Remove tools when server crashes in tests/unit/registry.test.ts
-- [ ] T073 [P] [US2] Write test: Lookup tool by prefixed name in O(1) time in tests/unit/registry.test.ts
+- [X] T067 [US2] Write test: Build registry from single child server in tests/unit/registry.test.ts
+- [X] T068 [P] [US2] Write test: Build registry from multiple child servers in tests/unit/registry.test.ts
+- [X] T069 [P] [US2] Write test: Prefix tools with serverKey in tests/unit/registry.test.ts
+- [X] T070 [P] [US2] Write test: Handle duplicate tool names from different servers in tests/unit/registry.test.ts
+- [X] T071 [P] [US2] Write test: Preserve original tool name for routing in tests/unit/registry.test.ts
+- [X] T072 [P] [US2] Write test: Remove tools when server crashes in tests/unit/registry.test.ts
+- [X] T073 [P] [US2] Write test: Lookup tool by prefixed name in O(1) time in tests/unit/registry.test.ts
 
 ### US2: Tool Registry Implementation
 
-- [ ] T074 [US2] Implement buildToolRegistry() to aggregate tools from all children in src/registry.ts
-- [ ] T075 [US2] Implement addServerTools() to add tools with prefix in src/registry.ts
-- [ ] T076 [US2] Implement removeServerTools() to remove crashed server's tools in src/registry.ts
-- [ ] T077 [US2] Implement lookupTool() for O(1) registry lookup in src/registry.ts
-- [ ] T078 [US2] Implement prefixing logic using serverKey:toolName format in src/registry.ts
+- [X] T074 [US2] Implement buildToolRegistry() to aggregate tools from all children in src/registry.ts
+- [X] T075 [US2] Implement addServerTools() to add tools with prefix in src/registry.ts
+- [X] T076 [US2] Implement removeServerTools() to remove crashed server's tools in src/registry.ts
+- [X] T077 [US2] Implement lookupTool() for O(1) registry lookup in src/registry.ts
+- [X] T078 [US2] Implement prefixing logic using serverKey:toolName format in src/registry.ts
 
 **Checkpoint**: Run tests T067-T073 - all should pass.
 
 ### US2: MCP Server Tests (TDD - Tests First)
 
-- [ ] T079 [US2] Write test: Create MCP server with tools capability in tests/unit/server.test.ts
-- [ ] T080 [P] [US2] Write test: Handle tools/list request from client in tests/unit/server.test.ts
-- [ ] T081 [P] [US2] Write test: Return all prefixed tools in tools/list response in tests/unit/server.test.ts
-- [ ] T082 [P] [US2] Write test: Update tool list when child server crashes in tests/unit/server.test.ts
-- [ ] T083 [P] [US2] Write test: Handle tools/list with zero servers in tests/unit/server.test.ts
+- [X] T079 [US2] Write test: Create MCP server with tools capability in tests/unit/server.test.ts
+- [X] T080 [P] [US2] Write test: Handle tools/list request from client in tests/unit/server.test.ts
+- [X] T081 [P] [US2] Write test: Return all prefixed tools in tools/list response in tests/unit/server.test.ts
+- [X] T082 [P] [US2] Write test: Update tool list when child server crashes in tests/unit/server.test.ts
+- [X] T083 [P] [US2] Write test: Handle tools/list with zero servers in tests/unit/server.test.ts
 
 ### US2: MCP Server Implementation
 
-- [ ] T084 [US2] Implement createAggregatorServer() with Server from MCP SDK in src/server.ts
-- [ ] T085 [US2] Implement tools/list request handler using registry in src/server.ts
-- [ ] T086 [US2] Implement server initialization with capabilities in src/server.ts
-- [ ] T087 [US2] Wire up child crash handlers to update registry in src/server.ts
+- [X] T084 [US2] Implement createAggregatorServer() with Server from MCP SDK in src/server.ts
+- [X] T085 [US2] Implement tools/list request handler using registry in src/server.ts
+- [X] T086 [US2] Implement server initialization with capabilities in src/server.ts
+- [X] T087 [US2] Wire up child crash handlers to update registry in src/server.ts
 
 **Checkpoint**: Run tests T079-T083 - all should pass.
 
 ### US2: Integration Tests
 
-- [ ] T088 [US2] Write integration test: List tools from 3 child servers in tests/integration/discovery.test.ts
-- [ ] T089 [US2] Write integration test: Verify tool prefixes match config keys in tests/integration/discovery.test.ts
-- [ ] T090 [US2] Write integration test: Handle same server configured twice with different keys in tests/integration/discovery.test.ts
-- [ ] T091 [US2] Write integration test: Remove tools when child crashes after startup in tests/integration/discovery.test.ts
+- [X] T088 [US2] Write integration test: List tools from 3 child servers in tests/integration/discovery.test.ts
+- [X] T089 [US2] Write integration test: Verify tool prefixes match config keys in tests/integration/discovery.test.ts
+- [X] T090 [US2] Write integration test: Handle same server configured twice with different keys in tests/integration/discovery.test.ts
+- [X] T091 [US2] Write integration test: Remove tools when child crashes after startup in tests/integration/discovery.test.ts
 
 **US2 Complete**: Clients can discover all aggregated tools with proper namespacing.
 
@@ -224,48 +224,48 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### US3: Request Routing Tests (TDD - Tests First)
 
-- [ ] T092 [US3] Write test: Parse tool name prefix correctly in tests/unit/routing.test.ts
-- [ ] T093 [P] [US3] Write test: Route tool call to correct child server in tests/unit/routing.test.ts
-- [ ] T094 [P] [US3] Write test: Forward arguments unchanged to child in tests/unit/routing.test.ts
-- [ ] T095 [P] [US3] Write test: Return child response unchanged to client in tests/unit/routing.test.ts
-- [ ] T096 [P] [US3] Write test: Return error for tool not found in tests/unit/routing.test.ts
-- [ ] T097 [P] [US3] Write test: Return error for missing prefix in tool name in tests/unit/routing.test.ts
-- [ ] T098 [P] [US3] Write test: Forward child server errors unchanged in tests/unit/routing.test.ts
+- [X] T092 [US3] Write test: Parse tool name prefix correctly in tests/unit/routing.test.ts
+- [X] T093 [P] [US3] Write test: Route tool call to correct child server in tests/unit/routing.test.ts
+- [X] T094 [P] [US3] Write test: Forward arguments unchanged to child in tests/unit/routing.test.ts
+- [X] T095 [P] [US3] Write test: Return child response unchanged to client in tests/unit/routing.test.ts
+- [X] T096 [P] [US3] Write test: Return error for tool not found in tests/unit/routing.test.ts
+- [X] T097 [P] [US3] Write test: Return error for missing prefix in tool name in tests/unit/routing.test.ts
+- [X] T098 [P] [US3] Write test: Forward child server errors unchanged in tests/unit/routing.test.ts
 
 ### US3: Request Routing Implementation
 
-- [ ] T099 [US3] Implement parseToolPrefix() to extract serverKey and toolName in src/server.ts
-- [ ] T100 [US3] Implement tools/call request handler with routing logic in src/server.ts
-- [ ] T101 [US3] Implement error handling for tool not found (McpError) in src/server.ts
-- [ ] T102 [US3] Implement error handling for invalid tool name format in src/server.ts
-- [ ] T103 [US3] Implement transparent argument forwarding to child in src/server.ts
-- [ ] T104 [US3] Implement transparent response forwarding from child in src/server.ts
+- [X] T099 [US3] Implement parseToolPrefix() to extract serverKey and toolName in src/server.ts
+- [X] T100 [US3] Implement tools/call request handler with routing logic in src/server.ts
+- [X] T101 [US3] Implement error handling for tool not found (McpError) in src/server.ts
+- [X] T102 [US3] Implement error handling for invalid tool name format in src/server.ts
+- [X] T103 [US3] Implement transparent argument forwarding to child in src/server.ts
+- [X] T104 [US3] Implement transparent response forwarding from child in src/server.ts
 
 **Checkpoint**: Run tests T092-T098 - all should pass.
 
 ### US3: Error Handling Tests (TDD - Tests First)
 
-- [ ] T105 [US3] Write test: Handle child server validation errors in tests/unit/error-handling.test.ts
-- [ ] T106 [P] [US3] Write test: Handle child server timeout gracefully in tests/unit/error-handling.test.ts
-- [ ] T107 [P] [US3] Write test: Handle child crash during tool call in tests/unit/error-handling.test.ts
-- [ ] T108 [P] [US3] Write test: Continue serving after child crashes in tests/unit/error-handling.test.ts
+- [X] T105 [US3] Write test: Handle child server validation errors in tests/unit/error-handling.test.ts
+- [X] T106 [P] [US3] Write test: Handle child server timeout gracefully in tests/unit/error-handling.test.ts
+- [X] T107 [P] [US3] Write test: Handle child crash during tool call in tests/unit/error-handling.test.ts
+- [X] T108 [P] [US3] Write test: Continue serving after child crashes in tests/unit/error-handling.test.ts
 
 ### US3: Error Handling Implementation
 
-- [ ] T109 [US3] Implement child error event handlers in src/child-manager.ts
-- [ ] T110 [US3] Implement graceful degradation on child crash in src/child-manager.ts
-- [ ] T111 [US3] Add error logging for child failures in src/child-manager.ts
-- [ ] T112 [US3] Ensure aggregator continues with remaining servers in src/child-manager.ts
+- [X] T109 [US3] Implement child error event handlers in src/child-manager.ts
+- [X] T110 [US3] Implement graceful degradation on child crash in src/child-manager.ts
+- [X] T111 [US3] Add error logging for child failures in src/child-manager.ts
+- [X] T112 [US3] Ensure aggregator continues with remaining servers in src/child-manager.ts
 
 **Checkpoint**: Run tests T105-T108 - all should pass.
 
 ### US3: Integration Tests
 
-- [ ] T113 [US3] Write integration test: Call tool successfully through aggregator in tests/integration/tool-execution.test.ts
-- [ ] T114 [US3] Write integration test: Route to correct server with multiple children in tests/integration/tool-execution.test.ts
-- [ ] T115 [US3] Write integration test: Handle invalid arguments from client in tests/integration/tool-execution.test.ts
-- [ ] T116 [US3] Write integration test: Handle non-existent tool name in tests/integration/tool-execution.test.ts
-- [ ] T117 [US3] Write integration test: Forward large responses correctly in tests/integration/tool-execution.test.ts
+- [X] T113 [US3] Write integration test: Call tool successfully through aggregator in tests/integration/tool-execution.test.ts
+- [X] T114 [US3] Write integration test: Route to correct server with multiple children in tests/integration/tool-execution.test.ts
+- [X] T115 [US3] Write integration test: Handle invalid arguments from client in tests/integration/tool-execution.test.ts
+- [X] T116 [US3] Write integration test: Handle non-existent tool name in tests/integration/tool-execution.test.ts
+- [X] T117 [US3] Write integration test: Forward large responses correctly in tests/integration/tool-execution.test.ts
 
 **US3 Complete**: Clients can execute tools through aggregator with transparent routing.
 
@@ -275,10 +275,10 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### Performance Tests
 
-- [ ] T118 [P] Write performance test: Verify 10 servers start within 5 seconds (SC-001) in tests/performance/startup.bench.ts
-- [ ] T119 [P] Write performance test: Verify tools/list responds within 1 second (SC-002) in tests/performance/discovery.bench.ts
-- [ ] T120 [P] Write performance test: Verify routing overhead < 50ms (SC-003) in tests/performance/routing.bench.ts
-- [ ] T121 [P] Write performance test: Measure concurrent tool invocations in tests/performance/concurrency.bench.ts
+- [X] T118 [P] Write performance test: Verify 10 servers start within 5 seconds (SC-001) in tests/performance/startup.bench.ts
+- [X] T119 [P] Write performance test: Verify tools/list responds within 1 second (SC-002) in tests/performance/discovery.bench.ts
+- [X] T120 [P] Write performance test: Verify routing overhead < 50ms (SC-003) in tests/performance/routing.bench.ts
+- [X] T121 [P] Write performance test: Measure concurrent tool invocations in tests/performance/concurrency.bench.ts
 
 ### Performance Optimization
 
@@ -288,17 +288,17 @@ These tasks create the foundation that all user stories depend on. Following TDD
 
 ### Code Quality
 
-- [ ] T125 [P] Add JSDoc comments to all public functions in src/
-- [ ] T126 [P] Add inline comments for complex logic (env var regex, prefix parsing) in src/
-- [ ] T127 Run linter and fix all issues across src/
-- [ ] T128 Verify TypeScript strict mode has no errors with `npm run build`
+- [X] T125 [P] Add JSDoc comments to all public functions in src/
+- [X] T126 [P] Add inline comments for complex logic (env var regex, prefix parsing) in src/
+- [X] T127 Run linter and fix all issues across src/
+- [X] T128 Verify TypeScript strict mode has no errors with `npm run build`
 - [ ] T129 Verify test coverage ≥ 80% with `npm run test:coverage`
 
 ### Documentation
 
-- [ ] T130 [P] Create README.md with installation, usage, and examples in project root
-- [ ] T131 [P] Update examples/sample-config.json with comprehensive examples in examples/
-- [ ] T132 [P] Add inline examples to error messages in src/config.ts
+- [X] T130 [P] Create README.md with installation, usage, and examples in project root
+- [X] T131 [P] Update examples/sample-config.json with comprehensive examples in examples/
+- [X] T132 [P] Add inline examples to error messages in src/config.ts
 
 ---
 

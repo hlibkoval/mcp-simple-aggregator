@@ -2,7 +2,9 @@
 
 import type { CliArgs, McpConfig } from './types.js';
 import { readConfigFile, parseConfig, expandConfigEnvVars } from './config.js';
-import { initializeChildren } from './child-manager.js';
+import { initializeChildren, setupErrorHandlers } from './child-manager.js';
+import { buildToolRegistry } from './registry.js';
+import { createAggregatorServer, startServer, setupToolCallHandler } from './server.js';
 
 /**
  * T058: Parse command-line arguments
@@ -144,10 +146,38 @@ async function main() {
       console.log(`[DEBUG] ${children.size} child servers initialized successfully`);
     }
 
-    // Create and start aggregator server
-    // TODO: This will be implemented in Phase 4 (US2)
+    // Build tool registry from all children
+    if (args.debug) console.log('[DEBUG] Building tool registry...');
+    const childClients = new Map(
+      Array.from(children.entries()).map(([key, child]) => [key, child.client])
+    );
+    const registry = await buildToolRegistry(childClients);
+
+    if (args.debug) {
+      console.log(`[DEBUG] Registry built with ${registry.size} tools`);
+    }
+
+    // Create aggregator server
+    if (args.debug) console.log('[DEBUG] Creating aggregator server...');
+    const server = createAggregatorServer(childClients, registry, {
+      name: args.name || 'mcp-simple-aggregator',
+      version: args.version || '1.0.0'
+    });
+
+    // Setup tool call handler
+    if (args.debug) console.log('[DEBUG] Setting up tool call handler...');
+    setupToolCallHandler(server, registry);
+
+    // Setup error handlers for graceful degradation (T109-T112)
+    if (args.debug) console.log('[DEBUG] Setting up error handlers...');
+    setupErrorHandlers(children, registry);
+
+    // Start the aggregator server
+    if (args.debug) console.log('[DEBUG] Starting MCP server on stdio...');
+    await startServer(server);
+
     console.log('Aggregator server started successfully');
-    console.log(`Serving ${children.size} child servers`);
+    console.log(`Serving ${children.size} child servers with ${registry.size} tools`);
 
     // Keep process running
     process.on('SIGINT', async () => {

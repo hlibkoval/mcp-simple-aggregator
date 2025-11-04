@@ -24,14 +24,14 @@ export async function readConfigFile(filePath: string): Promise<McpConfig> {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       throw new ConfigError(
-        `Config file not found: ${filePath}`,
+        `Config file not found: ${filePath}\n\nExample: Create a config file at the specified path:\n  echo '{"mcpServers": {"example": {"command": "node", "args": ["server.js"]}}}' > ${filePath}`,
         ConfigErrorCode.FILE_NOT_FOUND,
         { path: filePath }
       );
     }
     if (error instanceof SyntaxError) {
       throw new ConfigError(
-        `Invalid JSON in config file: ${error.message}`,
+        `Invalid JSON in config file: ${error.message}\n\nExample of valid JSON structure:\n{\n  "mcpServers": {\n    "filesystem": {\n      "command": "npx",\n      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]\n    }\n  }\n}`,
         ConfigErrorCode.INVALID_JSON,
         { path: filePath, error: error.message }
       );
@@ -225,7 +225,7 @@ export function expandEnvVar(value: string, context?: ExpansionContext): string 
   // T041: Error handling with specific variable name
   if (missingVars.length > 0) {
     throw new ConfigError(
-      `Missing environment variable${missingVars.length > 1 ? 's' : ''}: ${missingVars.join(', ')}`,
+      `Missing environment variable${missingVars.length > 1 ? 's' : ''}: ${missingVars.join(', ')}\n\nExample: Set the required variable(s) before running:\n  export ${missingVars[0]}="/path/to/value"\n  mcp-aggregator --config config.json`,
       ConfigErrorCode.MISSING_ENV_VAR,
       {
         variable: missingVars[0],

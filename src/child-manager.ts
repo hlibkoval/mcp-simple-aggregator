@@ -3,13 +3,15 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import type {
   McpConfig,
   ServerConfig,
-  ChildServerClient
+  ChildServerClient,
+  ToolRegistry
 } from './types.js';
 import {
   ServerStatus,
   ChildServerError,
   ErrorPhase
 } from './types.js';
+import { removeServerTools } from './registry.js';
 
 /**
  * T048: Create an MCP client instance for connecting to a child server
@@ -78,7 +80,7 @@ export async function connectToChild(
       childServerClient.status = ServerStatus.RUNNING;
     } catch (error) {
       throw new ChildServerError(
-        `Child server '${serverKey}' failed health check: ${(error as Error).message}`,
+        `Child server '${serverKey}' failed health check: ${(error as Error).message}\n\nExample: Ensure the child server implements the MCP protocol correctly:\n- Server must respond to listTools() request\n- Check that the command and args in your config are correct\n- Verify the server executable exists and is accessible`,
         serverKey,
         ErrorPhase.INITIALIZATION,
         error as Error
@@ -103,7 +105,7 @@ export async function connectToChild(
     childServerClient.error = error as Error;
 
     throw new ChildServerError(
-      `Failed to connect to child server '${serverKey}': ${(error as Error).message}`,
+      `Failed to connect to child server '${serverKey}': ${(error as Error).message}\n\nExample troubleshooting steps:\n1. Verify command exists: which ${config.command}\n2. Test manually: ${config.command} ${config.args?.join(' ') || ''}\n3. Check server logs for errors\n4. Ensure server uses stdio transport`,
       serverKey,
       ErrorPhase.STARTUP,
       error as Error
@@ -185,4 +187,53 @@ export async function shutdownAllChildren(
   );
 
   await Promise.all(shutdownPromises);
+}
+
+/**
+ * T109-T112: Setup error handlers for child servers with registry integration
+ *
+ * Sets up error event handlers for all child servers to implement graceful degradation.
+ * When a child server crashes:
+ * - T109: Error event handler is triggered
+ * - T110: Gracefully degrades by removing crashed server's tools from registry
+ * - T111: Logs error for debugging
+ * - T112: Aggregator continues serving remaining servers
+ *
+ * @param children - Map of all child server clients
+ * @param registry - Tool registry to update when servers crash
+ */
+export function setupErrorHandlers(
+  children: Map<string, ChildServerClient>,
+  registry: ToolRegistry
+): void {
+  for (const [serverKey, childClient] of children.entries()) {
+    // T109: Implement child error event handlers
+    childClient.client.onerror = (error: Error) => {
+      // T111: Add error logging for child failures
+      console.error(
+        `[ERROR] Child server '${serverKey}' crashed: ${error.message}`
+      );
+      console.error(`[ERROR] Stack trace:`, error.stack);
+
+      // Update child status
+      childClient.status = ServerStatus.FAILED;
+      childClient.error = error;
+
+      // T110: Implement graceful degradation on child crash
+      // T112: Ensure aggregator continues with remaining servers
+      console.log(
+        `[INFO] Removing tools for crashed server '${serverKey}' from registry`
+      );
+      removeServerTools(registry, serverKey);
+
+      const remainingTools = registry.size;
+      console.log(
+        `[INFO] Aggregator continues serving with ${remainingTools} tools from remaining servers`
+      );
+    };
+  }
+
+  console.log(
+    `[INFO] Error handlers configured for ${children.size} child servers`
+  );
 }

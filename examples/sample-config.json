@@ -1,11 +1,12 @@
 {
+  "$schema": "https://modelcontextprotocol.io/schema/claude-desktop-config.json",
   "mcpServers": {
     "filesystem": {
       "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/user/Documents"
+        "/Users/username/Documents"
       ],
       "env": {
         "LOG_LEVEL": "info"
