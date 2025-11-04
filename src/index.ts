@@ -5,6 +5,7 @@ import { readConfigFile, parseConfig, expandConfigEnvVars } from './config.js';
 import { initializeChildren, setupErrorHandlers } from './child-manager.js';
 import { buildToolRegistry } from './registry.js';
 import { createAggregatorServer, startServer, setupToolCallHandler } from './server.js';
+import { setDebugMode, logDebug, logInfo } from './logger.js';
 
 /**
  * T058: Parse command-line arguments
@@ -122,74 +123,70 @@ async function main() {
     const args = parseCliArgs();
     validateCliArgs(args);
 
-    if (args.debug) {
-      console.log('[DEBUG] Starting MCP Simple Aggregator');
-      console.log('[DEBUG] Config path:', args.configPath);
-    }
+    // Set debug mode for logger
+    setDebugMode(args.debug || false);
+
+    logDebug('[DEBUG] Starting MCP Simple Aggregator');
+    logDebug('[DEBUG] Config path:', args.configPath);
 
     // Read and parse configuration
-    if (args.debug) console.log('[DEBUG] Reading config file...');
+    logDebug('[DEBUG] Reading config file...');
     const rawConfig = await readConfigFile(args.configPath!);
 
-    if (args.debug) console.log('[DEBUG] Parsing config...');
+    logDebug('[DEBUG] Parsing config...');
     const validConfig = parseConfig(rawConfig);
 
     // Expand environment variables
-    if (args.debug) console.log('[DEBUG] Expanding environment variables...');
+    logDebug('[DEBUG] Expanding environment variables...');
     const expandedConfig = expandConfigEnvVars(validConfig) as McpConfig;
 
     // Initialize all child servers
-    if (args.debug) console.log('[DEBUG] Initializing child servers...');
+    logDebug('[DEBUG] Initializing child servers...');
     const children = await initializeChildren(expandedConfig);
 
-    if (args.debug) {
-      console.log(`[DEBUG] ${children.size} child servers initialized successfully`);
-    }
+    logDebug(`[DEBUG] ${children.size} child servers initialized successfully`);
 
     // Build tool registry from all children
-    if (args.debug) console.log('[DEBUG] Building tool registry...');
+    logDebug('[DEBUG] Building tool registry...');
     const childClients = new Map(
       Array.from(children.entries()).map(([key, child]) => [key, child.client])
     );
     const registry = await buildToolRegistry(childClients);
 
-    if (args.debug) {
-      console.log(`[DEBUG] Registry built with ${registry.size} tools`);
-    }
+    logDebug(`[DEBUG] Registry built with ${registry.size} tools`);
 
     // Create aggregator server
-    if (args.debug) console.log('[DEBUG] Creating aggregator server...');
+    logDebug('[DEBUG] Creating aggregator server...');
     const server = createAggregatorServer(childClients, registry, {
       name: args.name || 'mcp-simple-aggregator',
       version: args.version || '1.0.0'
     });
 
     // Setup tool call handler
-    if (args.debug) console.log('[DEBUG] Setting up tool call handler...');
+    logDebug('[DEBUG] Setting up tool call handler...');
     setupToolCallHandler(server, registry);
 
     // Setup error handlers for graceful degradation (T109-T112)
-    if (args.debug) console.log('[DEBUG] Setting up error handlers...');
+    logDebug('[DEBUG] Setting up error handlers...');
     setupErrorHandlers(children, registry);
 
     // Start the aggregator server
-    if (args.debug) console.log('[DEBUG] Starting MCP server on stdio...');
+    logDebug('[DEBUG] Starting MCP server on stdio...');
     await startServer(server);
 
-    console.log('Aggregator server started successfully');
-    console.log(`Serving ${children.size} child servers with ${registry.size} tools`);
+    logInfo('Aggregator server started successfully');
+    logInfo(`Serving ${children.size} child servers with ${registry.size} tools`);
 
     // Keep process running
     process.on('SIGINT', async () => {
-      console.log('\nShutting down...');
+      logInfo('\nShutting down...');
       process.exit(0);
     });
 
   } catch (error) {
+    // Always log fatal errors
     console.error('Fatal error:', (error as Error).message);
-    if (process.env.DEBUG) {
-      console.error((error as Error).stack);
-    }
+    logDebug((error as Error).stack || '');
     process.exit(1);
   }
 }

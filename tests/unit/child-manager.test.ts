@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import path from 'path';
 import { createChildClient, connectToChild, initializeChildren, resolveCommand } from '../../src/child-manager.js';
 import { ServerConfig, ChildServerError, ErrorPhase } from '../../src/types.js';
+import { setDebugMode } from '../../src/logger.js';
 
 describe('Child Server Manager', () => {
   describe('T042: Initialize single child server with valid config', () => {
@@ -542,11 +543,15 @@ describe('Child Server Manager', () => {
     let consoleSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-      consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      // Enable debug mode for logging tests
+      setDebugMode(true);
+      consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
       consoleSpy.mockRestore();
+      // Disable debug mode after tests
+      setDebugMode(false);
     });
 
     it('T009: resolveCommand logs resolution when command changes', () => {

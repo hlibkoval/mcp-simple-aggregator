@@ -14,6 +14,7 @@ import {
   ErrorPhase
 } from './types.js';
 import { removeServerTools } from './registry.js';
+import { logInfo, logError } from './logger.js';
 
 /**
  * Resolves node-related commands to absolute paths
@@ -35,7 +36,7 @@ export function resolveCommand(command: string): string {
   // Resolve "node" to parent's node executable
   if (command === 'node') {
     const resolved = process.execPath;
-    console.log(`[INFO] Resolved '${command}' to '${resolved}'`);
+    logInfo(`[INFO] Resolved '${command}' to '${resolved}'`);
     return resolved;
   }
 
@@ -47,7 +48,7 @@ export function resolveCommand(command: string): string {
     if (process.platform === 'win32') {
       const cmdPath = path.join(nodeDir, `${command}.cmd`);
       if (fs.existsSync(cmdPath)) {
-        console.log(`[INFO] Resolved '${command}' to '${cmdPath}'`);
+        logInfo(`[INFO] Resolved '${command}' to '${cmdPath}'`);
         return cmdPath;
       }
     }
@@ -55,7 +56,7 @@ export function resolveCommand(command: string): string {
     // Unix or Windows fallback: No extension
     const unixPath = path.join(nodeDir, command);
     if (fs.existsSync(unixPath)) {
-      console.log(`[INFO] Resolved '${command}' to '${unixPath}'`);
+      logInfo(`[INFO] Resolved '${command}' to '${unixPath}'`);
       return unixPath;
     }
 
@@ -146,7 +147,7 @@ export async function connectToChild(
 
     // T052: Set up error handling for runtime failures
     client.onerror = (error) => {
-      console.error(`Child server '${serverKey}' crashed:`, error);
+      logError(`Child server '${serverKey}' crashed:`, error);
       childServerClient.status = ServerStatus.FAILED;
       childServerClient.error = error;
     };
@@ -194,14 +195,14 @@ export async function initializeChildren(
     }
 
     try {
-      console.log(`Starting child server '${serverKey}'...`);
+      logInfo(`Starting child server '${serverKey}'...`);
       const childClient = await connectToChild(serverKey, serverConfig);
       children.set(serverKey, childClient);
-      console.log(`Child server '${serverKey}' started successfully`);
+      logInfo(`Child server '${serverKey}' started successfully`);
     } catch (error) {
       // T053: Exit on any child failure
       if (error instanceof ChildServerError) {
-        console.error(`Failed to start server '${serverKey}':`, error.message);
+        logError(`Failed to start server '${serverKey}':`, error.message);
         throw error;
       }
       throw new ChildServerError(
@@ -213,7 +214,7 @@ export async function initializeChildren(
     }
   }
 
-  console.log(`All ${children.size} child servers started successfully`);
+  logInfo(`All ${children.size} child servers started successfully`);
   return children;
 }
 
@@ -226,7 +227,7 @@ export async function shutdownChild(childClient: ChildServerClient): Promise<voi
     await childClient.client.close();
     childClient.status = ServerStatus.STOPPED;
   } catch (error) {
-    console.error(`Error shutting down '${childClient.serverKey}':`, error);
+    logError(`Error shutting down '${childClient.serverKey}':`, error);
     childClient.status = ServerStatus.FAILED;
     childClient.error = error as Error;
   }
@@ -267,10 +268,10 @@ export function setupErrorHandlers(
     // T109: Implement child error event handlers
     childClient.client.onerror = (error: Error) => {
       // T111: Add error logging for child failures
-      console.error(
+      logError(
         `[ERROR] Child server '${serverKey}' crashed: ${error.message}`
       );
-      console.error(`[ERROR] Stack trace:`, error.stack);
+      logError(`[ERROR] Stack trace:`, error.stack);
 
       // Update child status
       childClient.status = ServerStatus.FAILED;
@@ -278,19 +279,19 @@ export function setupErrorHandlers(
 
       // T110: Implement graceful degradation on child crash
       // T112: Ensure aggregator continues with remaining servers
-      console.log(
+      logInfo(
         `[INFO] Removing tools for crashed server '${serverKey}' from registry`
       );
       removeServerTools(registry, serverKey);
 
       const remainingTools = registry.size;
-      console.log(
+      logInfo(
         `[INFO] Aggregator continues serving with ${remainingTools} tools from remaining servers`
       );
     };
   }
 
-  console.log(
+  logInfo(
     `[INFO] Error handlers configured for ${children.size} child servers`
   );
 }
