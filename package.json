@@ -20,7 +20,7 @@
     "dev": "tsup --watch",
     "lint": "tsc --noEmit",
     "clean": "rm -rf dist coverage",
-    "prepublishOnly": "npm run build && vitest --run --exclude='**/*.bench.ts' && npm run lint"
+    "prepublishOnly": "node -e \"if (!process.env.CI) { console.error('ERROR: npm publish is restricted to GitHub Actions only.\\nPlease push a version tag to trigger automated release: npm version patch && git push --tags'); process.exit(1); }\" && npm run build && vitest --run --exclude='**/*.bench.ts' && npm run lint"
   },
   "keywords": [
     "mcp",
