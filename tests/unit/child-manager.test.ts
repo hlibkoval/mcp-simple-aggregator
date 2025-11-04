@@ -556,23 +556,21 @@ describe('Child Server Manager', () => {
 
     it('T009: resolveCommand logs resolution when command changes', () => {
       resolveCommand('node');
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/\[INFO\].*node.*to/)
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining(process.execPath)
-      );
+      // With file-based logging, console.error should NOT be called
+      expect(consoleSpy).not.toHaveBeenCalled();
     });
 
     it('T010: resolveCommand does not log when command unchanged', () => {
       consoleSpy.mockClear();
       resolveCommand('python');
+      // With file-based logging, console.error should NOT be called
       expect(consoleSpy).not.toHaveBeenCalled();
     });
 
     it('should not log for absolute paths', () => {
       consoleSpy.mockClear();
       resolveCommand('/usr/bin/node');
+      // With file-based logging, console.error should NOT be called
       expect(consoleSpy).not.toHaveBeenCalled();
     });
   });

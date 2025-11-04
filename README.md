@@ -130,9 +130,11 @@ The aggregator automatically resolves `node`, `npm`, and `npx` commands to absol
 }
 ```
 
-**Debugging:** Check the logs to see resolved paths:
-```
-[INFO] Resolved 'node' to '/usr/local/bin/node' for child server 'my-server'
+**Debugging:** Enable `--debug` mode to see resolved paths in the log file:
+```bash
+mcp-simple-aggregator --config config.json --debug
+tail -f /tmp/mcp-aggregator-*.log
+# Shows: [INFO] Resolved 'node' to '/usr/local/bin/node'
 ```
 
 **Override:** To use a specific Node.js version, provide an absolute path:
@@ -229,7 +231,8 @@ mcp-simple-aggregator --config <path> [options]
 
 **Options:**
 - `--config <path>` (required): Path to MCP configuration JSON file
-- `--debug`: Enable debug logging
+- `--debug`: Enable debug logging to file
+- `--log-file <path>`: Path to log file (default: `/tmp/mcp-aggregator-{pid}.log`)
 - `--name <name>`: Custom server name (default: `mcp-simple-aggregator`)
 - `--version <version>`: Custom server version (default: `1.0.0`)
 - `--help`, `-h`: Show help message
@@ -240,12 +243,42 @@ mcp-simple-aggregator --config <path> [options]
 # Basic usage
 mcp-simple-aggregator --config config.json
 
-# With debug logging
+# With debug logging (logs to /tmp/mcp-aggregator-{pid}.log)
 mcp-simple-aggregator --config config.json --debug
+
+# With custom log file
+mcp-simple-aggregator --config config.json --debug --log-file /var/log/mcp.log
 
 # Custom server name
 mcp-simple-aggregator --config config.json --name my-aggregator
 ```
+
+### Debug Logging
+
+The aggregator supports file-based debug logging that keeps stdio clean for the MCP JSON-RPC protocol:
+
+**Enable debug logging:**
+```bash
+# Default log location: /tmp/mcp-aggregator-{pid}.log
+mcp-simple-aggregator --config config.json --debug
+
+# Custom log location
+mcp-simple-aggregator --config config.json --debug --log-file /var/log/mcp.log
+```
+
+**Watch logs in real-time:**
+```bash
+tail -f /tmp/mcp-aggregator-*.log
+```
+
+**Log format:**
+```
+2025-11-04T15:18:05.880Z [INFO] Child server initialized: filesystem
+2025-11-04T15:18:05.901Z [DEBUG] Discovered 12 tools from filesystem
+2025-11-04T15:18:05.950Z [ERROR] Failed to connect to postgres: ECONNREFUSED
+```
+
+**Important:** Debug logs are written to files only, never to stdout/stderr. This prevents JSON-RPC protocol pollution that would break MCP communication.
 
 ## Use Cases
 
