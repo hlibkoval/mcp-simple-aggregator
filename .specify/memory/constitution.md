@@ -1,31 +1,31 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: Initial → 1.0.0
-Rationale: First version of constitution establishing core principles for code quality,
-           testing standards, user experience consistency, and performance requirements.
+Version Change: 1.0.0 → 0.0.1
+Rationale: Reset to incubation phase with relaxed semver policy. Breaking changes allowed
+           pre-1.0.0 to enable rapid iteration. Explicit user approval required for 1.0.0.
 
 Modified Principles:
-- All principles are newly added (initial constitution)
+- None (all 5 principles remain unchanged)
+
+Modified Sections:
+- Governance: Updated versioning policy to support relaxed semver during incubation
 
 Added Sections:
-- Core Principles (5 principles)
-- Development Standards
-- Quality Gates
-- Governance
+- None
 
 Removed Sections:
-- None (initial version)
+- None
 
 Templates Status:
-✅ plan-template.md - Constitution Check section aligns with principles
-✅ spec-template.md - Requirements section aligns with quality standards
-✅ tasks-template.md - Test-first approach and structure match principles
+✅ plan-template.md - No changes required (principles unchanged)
+✅ spec-template.md - No changes required (quality standards unchanged)
+✅ tasks-template.md - No changes required (test-first approach unchanged)
 ✅ checklist-template.md - No changes required (generic template)
 ✅ agent-file-template.md - No changes required (generic template)
 
 Follow-up TODOs:
-- None (all placeholders filled)
+- None (all templates remain aligned)
 -->
 
 # MCP Simple Aggregator Constitution
@@ -149,10 +149,21 @@ This constitution supersedes all other development practices. Changes to this co
 - MINOR version: New principle added or existing principle materially expanded
 - PATCH version: Clarifications, wording improvements, typo fixes
 
+**Versioning Policy (Incubation Phase)**:
+- Pre-1.0.0: Relaxed semver applies - breaking changes allowed in MINOR versions
+- MINOR: New features or breaking changes (rapid iteration permitted)
+- PATCH: Bug fixes and non-breaking improvements only
+- 1.0.0 Promotion: Requires explicit user approval and signals stable API contract
+- Post-1.0.0: Standard semver applies - breaking changes require MAJOR version bump
+
+**Rationale**: During incubation (<1.0.0), the project prioritizes rapid iteration and
+learning over backward compatibility. Users are expected to track changes closely.
+Once promoted to 1.0.0, strict semver ensures stability for production users.
+
 **Compliance**:
 - All code reviews MUST verify adherence to constitution principles
 - Exceptions MUST be documented in Complexity Tracking section
 - Regular audits to ensure ongoing compliance
 - Constitution violations justify blocking merge requests
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-03
+**Version**: 0.0.1 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-04
