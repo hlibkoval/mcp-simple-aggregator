@@ -155,7 +155,7 @@ The aggregator uses standard Claude Desktop MCP config format:
 
 Releases are automated via GitHub Actions:
 1. Update `CHANGELOG.md` - move content from `[Unreleased]` to new version section
-2. Bump version: `npm version patch|minor|major`
+2. Bump version: `npm version patch|minor`
 3. Push with tags: `git push && git push --tags`
 4. GitHub Action automatically publishes to npm and creates GitHub release with CHANGELOG notes
 
