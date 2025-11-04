@@ -102,6 +102,46 @@ All tools are prefixed with their server key from the config:
 
 This prevents naming conflicts when multiple servers provide tools with the same name.
 
+### Custom Separators
+
+By default, tools are namespaced using a colon separator (`:`, e.g., `github:create_issue`). You can customize the separator using the `--separator` argument:
+
+**Single-character separators:**
+```bash
+# Dot separator
+mcp-simple-aggregator --config config.json --separator "."
+# Result: github.create_issue, filesystem.read_file
+
+# Underscore separator
+mcp-simple-aggregator --config config.json --separator "_"
+# Result: github_create_issue, filesystem_read_file
+```
+
+**Multi-character separators:**
+```bash
+# Double underscore
+mcp-simple-aggregator --config config.json --separator "__"
+# Result: github__create_issue, filesystem__read_file
+
+# Double colon
+mcp-simple-aggregator --config config.json --separator "::"
+# Result: github::create_issue, filesystem::read_file
+
+# Arrow notation
+mcp-simple-aggregator --config config.json --separator "->"
+# Result: github->create_issue, filesystem->read_file
+```
+
+**Validation:**
+- Separator cannot be empty
+- Separator cannot contain whitespace (space, tab, newline)
+- Any non-whitespace character or string is valid
+
+**Use Cases:**
+- **Language conventions**: Use `.` for Java/Python-style namespacing
+- **Readability**: Use `__` for clearer visual separation
+- **Compatibility**: Use `-` or `_` if `:` conflicts with other tools
+
 ### Automatic Command Resolution
 
 The aggregator automatically resolves `node`, `npm`, and `npx` commands to absolute paths to prevent "command not found" errors, especially in environments where these executables are not in the PATH.
@@ -231,6 +271,7 @@ mcp-simple-aggregator --config <path> [options]
 
 **Options:**
 - `--config <path>` (required): Path to MCP configuration JSON file
+- `--separator <chars>`: Custom separator for tool namespacing (default: `:`)
 - `--debug`: Enable debug logging to file
 - `--log-file <path>`: Path to log file (default: `/tmp/mcp-aggregator-{pid}.log`)
 - `--name <name>`: Custom server name (default: `mcp-simple-aggregator`)
@@ -240,14 +281,23 @@ mcp-simple-aggregator --config <path> [options]
 **Examples:**
 
 ```bash
-# Basic usage
+# Basic usage (default ':' separator)
 mcp-simple-aggregator --config config.json
+
+# Custom separator (double underscore)
+mcp-simple-aggregator --config config.json --separator "__"
+
+# Custom separator (dot notation)
+mcp-simple-aggregator --config config.json --separator "."
 
 # With debug logging (logs to /tmp/mcp-aggregator-{pid}.log)
 mcp-simple-aggregator --config config.json --debug
 
 # With custom log file
 mcp-simple-aggregator --config config.json --debug --log-file /var/log/mcp.log
+
+# Custom separator and log file
+mcp-simple-aggregator --config config.json --separator "__" --debug --log-file /var/log/mcp.log
 
 # Custom server name
 mcp-simple-aggregator --config config.json --name my-aggregator

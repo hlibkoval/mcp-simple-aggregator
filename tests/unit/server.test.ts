@@ -18,7 +18,8 @@ import type { ToolRegistry, ToolRegistryEntry, ToolSchema } from '../../src/type
 import {
   createAggregatorServer,
   handleToolsList,
-  updateRegistryAfterCrash
+  updateRegistryAfterCrash,
+  parseToolPrefix
 } from '../../src/server.js';
 
 describe('MCP Server', () => {
@@ -414,6 +415,178 @@ describe('MCP Server', () => {
 
       expect(pgTool?.description).toBe('PostgreSQL query');
       expect(mysqlTool?.description).toBe('MySQL query');
+    });
+  });
+
+  describe('T004: [US1] parseToolPrefix with default colon separator', () => {
+    it('should parse tool name with default colon separator', () => {
+      const result = parseToolPrefix('github:create_issue');
+
+      expect(result).not.toBeNull();
+      expect(result?.serverKey).toBe('github');
+      expect(result?.toolName).toBe('create_issue');
+    });
+
+    it('should parse multiple colon-separated tools correctly', () => {
+      const result1 = parseToolPrefix('filesystem:read_file');
+      const result2 = parseToolPrefix('database:query');
+      const result3 = parseToolPrefix('api:get_user');
+
+      expect(result1?.serverKey).toBe('filesystem');
+      expect(result1?.toolName).toBe('read_file');
+
+      expect(result2?.serverKey).toBe('database');
+      expect(result2?.toolName).toBe('query');
+
+      expect(result3?.serverKey).toBe('api');
+      expect(result3?.toolName).toBe('get_user');
+    });
+
+    it('should handle tool names containing colons (split at first colon)', () => {
+      // This is an edge case: tool name itself contains a colon
+      const result = parseToolPrefix('github:search:code');
+
+      expect(result).not.toBeNull();
+      expect(result?.serverKey).toBe('github');
+      expect(result?.toolName).toBe('search:code');
+    });
+
+    it('should return null for tool names without separator', () => {
+      const result = parseToolPrefix('invalid_tool_name');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null for tool names with empty serverKey', () => {
+      const result = parseToolPrefix(':toolname');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null for tool names with empty toolName', () => {
+      const result = parseToolPrefix('serverKey:');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('T021-T023: [US2] parseToolPrefix with custom separators', () => {
+    it('T021: should parse tool name with custom separator __', () => {
+      const result = parseToolPrefix('github__create_issue', '__');
+
+      expect(result).not.toBeNull();
+      expect(result?.serverKey).toBe('github');
+      expect(result?.toolName).toBe('create_issue');
+    });
+
+    it('T022: should parse tool name with dot separator', () => {
+      const result = parseToolPrefix('filesystem.read_file', '.');
+
+      expect(result).not.toBeNull();
+      expect(result?.serverKey).toBe('filesystem');
+      expect(result?.toolName).toBe('read_file');
+    });
+
+    it('T023: should handle multi-character separators correctly', () => {
+      const result1 = parseToolPrefix('database::query', '::');
+      const result2 = parseToolPrefix('api--get_user', '--');
+      const result3 = parseToolPrefix('service->method', '->');
+
+      expect(result1?.serverKey).toBe('database');
+      expect(result1?.toolName).toBe('query');
+
+      expect(result2?.serverKey).toBe('api');
+      expect(result2?.toolName).toBe('get_user');
+
+      expect(result3?.serverKey).toBe('service');
+      expect(result3?.toolName).toBe('method');
+    });
+
+    it('should handle tool names containing the separator (split at first occurrence)', () => {
+      // Tool name contains the separator
+      const result = parseToolPrefix('github__search__code', '__');
+
+      expect(result).not.toBeNull();
+      expect(result?.serverKey).toBe('github');
+      expect(result?.toolName).toBe('search__code');
+    });
+
+    it('should return null when tool name has wrong separator', () => {
+      // Trying to parse with ':' when tool uses '__'
+      const result = parseToolPrefix('github__create_issue', ':');
+
+      expect(result).toBeNull();
+    });
+
+    it('should correctly handle empty serverKey or toolName with custom separator', () => {
+      const result1 = parseToolPrefix('__toolname', '__');
+      const result2 = parseToolPrefix('serverKey__', '__');
+
+      expect(result1).toBeNull();
+      expect(result2).toBeNull();
+    });
+  });
+
+  describe('T037-T039: [US3] parseToolPrefix validation edge cases', () => {
+    it('T037: should reject prefixed names without separator', () => {
+      // No separator in name
+      const result1 = parseToolPrefix('invalidtoolname', ':');
+      expect(result1).toBeNull();
+
+      const result2 = parseToolPrefix('toolname', '__');
+      expect(result2).toBeNull();
+
+      const result3 = parseToolPrefix('some_tool_name', '.');
+      expect(result3).toBeNull();
+    });
+
+    it('T038: should reject empty serverKey', () => {
+      // Separator at the beginning means empty serverKey
+      const result1 = parseToolPrefix(':toolname', ':');
+      expect(result1).toBeNull();
+
+      const result2 = parseToolPrefix('__toolname', '__');
+      expect(result2).toBeNull();
+
+      const result3 = parseToolPrefix('.toolname', '.');
+      expect(result3).toBeNull();
+
+      const result4 = parseToolPrefix('::method', '::');
+      expect(result4).toBeNull();
+    });
+
+    it('T039: should reject empty toolName', () => {
+      // Separator at the end means empty toolName
+      const result1 = parseToolPrefix('serverKey:', ':');
+      expect(result1).toBeNull();
+
+      const result2 = parseToolPrefix('serverKey__', '__');
+      expect(result2).toBeNull();
+
+      const result3 = parseToolPrefix('server.', '.');
+      expect(result3).toBeNull();
+
+      const result4 = parseToolPrefix('api::', '::');
+      expect(result4).toBeNull();
+    });
+
+    it('should reject both empty serverKey and toolName', () => {
+      const result1 = parseToolPrefix(':', ':');
+      expect(result1).toBeNull();
+
+      const result2 = parseToolPrefix('__', '__');
+      expect(result2).toBeNull();
+
+      const result3 = parseToolPrefix('::', '::');
+      expect(result3).toBeNull();
+    });
+
+    it('should handle edge case with only separator characters', () => {
+      const result1 = parseToolPrefix(':::', '::');
+      expect(result1).toBeNull();
+
+      const result2 = parseToolPrefix('___', '__');
+      expect(result2).toBeNull();
     });
   });
 });

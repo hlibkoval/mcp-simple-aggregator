@@ -199,6 +199,8 @@ The CI check in `prepublishOnly` prevents accidental manual publishes.
 ## Active Technologies
 - TypeScript 5.3+ (Node.js 18+) + @modelcontextprotocol/sdk (stdio transport), tsup (build), vitest (testing) (003-fix-stdio-logging)
 - File-based debug logs (when --debug enabled) (003-fix-stdio-logging)
+- TypeScript 5.3+ / Node.js 18+ + @modelcontextprotocol/sdk (stdio transport), tsup (build), vitest (testing) (005-configurable-separator)
+- N/A (stateless aggregator) (005-configurable-separator)
 
 ## Recent Changes
 - 003-fix-stdio-logging: Added TypeScript 5.3+ (Node.js 18+) + @modelcontextprotocol/sdk (stdio transport), tsup (build), vitest (testing)

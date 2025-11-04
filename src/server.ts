@@ -146,55 +146,67 @@ export async function startServer(server: Server): Promise<void> {
 }
 
 /**
- * Parse tool prefix from prefixed tool name
+ * T010: Parse tool prefix from prefixed tool name with configurable separator
  *
  * Extracts the server key and original tool name from a prefixed tool name.
- * Format: serverKey:toolName
+ * Supports configurable separator (default: ':').
  *
  * @param prefixedName - Prefixed tool name (e.g., 'filesystem:read_file')
+ * @param separator - Separator string (default: ':')
  * @returns Object with serverKey and toolName, or null if invalid format
  *
  * @example
- * parseToolPrefix('filesystem:read_file')
+ * parseToolPrefix('filesystem:read_file', ':')
+ * // Returns: { serverKey: 'filesystem', toolName: 'read_file' }
+ *
+ * parseToolPrefix('filesystem__read_file', '__')
  * // Returns: { serverKey: 'filesystem', toolName: 'read_file' }
  */
 export function parseToolPrefix(
-  prefixedName: string
+  prefixedName: string,
+  separator: string = ':'
 ): { serverKey: string; toolName: string } | null {
-  const colonIndex = prefixedName.indexOf(':');
+  const separatorIndex = prefixedName.indexOf(separator);
 
-  if (colonIndex === -1 || colonIndex === 0 || colonIndex === prefixedName.length - 1) {
+  // Check for invalid cases: no separator, empty serverKey, or empty toolName
+  if (
+    separatorIndex === -1 ||
+    separatorIndex === 0 ||
+    separatorIndex === prefixedName.length - separator.length
+  ) {
     return null;
   }
 
-  const serverKey = prefixedName.slice(0, colonIndex);
-  const toolName = prefixedName.slice(colonIndex + 1);
+  const serverKey = prefixedName.slice(0, separatorIndex);
+  const toolName = prefixedName.slice(separatorIndex + separator.length);
 
   return { serverKey, toolName };
 }
 
 /**
- * Setup tools/call request handler
+ * T011 & T015: Setup tools/call request handler with configurable separator
  *
- * This will be implemented in Phase 5 (US3) for tool execution.
- * For now, this is a placeholder that can be called from index.ts.
+ * Handles tool/call requests and routes them to the appropriate child server.
+ * Uses configurable separator for parsing tool names.
  *
  * @param server - MCP Server instance
  * @param registry - Tool registry
+ * @param separator - Separator string (default: ':')
  */
 export function setupToolCallHandler(
   server: Server,
-  registry: ToolRegistry
+  registry: ToolRegistry,
+  separator: string = ':'
 ): void {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name: prefixedName, arguments: args } = request.params;
 
-    // Parse prefix
-    const parsed = parseToolPrefix(prefixedName);
+    // T015: Parse prefix using configurable separator
+    const parsed = parseToolPrefix(prefixedName, separator);
     if (!parsed) {
       throw new McpError(
         ErrorCode.InvalidRequest,
-        `Invalid tool name format. Expected 'serverKey:toolName', got '${prefixedName}'`
+        `Invalid tool name format. Expected 'serverKey${separator}toolName', got '${prefixedName}'`
       );
     }
 

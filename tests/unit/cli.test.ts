@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseCliArgs, validateCliArgs } from '../../src/index.js';
+import { parseCliArgs, validateCliArgs, validateSeparator } from '../../src/index.js';
 
 describe('CLI Argument Parsing', () => {
   describe('T054: Parse --config argument', () => {
@@ -144,6 +144,165 @@ describe('CLI Argument Parsing', () => {
 
       consoleLogSpy.mockRestore();
       processExitSpy.mockRestore();
+    });
+  });
+
+  describe('T002: [US1] Default separator behavior', () => {
+    it('should not set separator field when not provided', () => {
+      const args = ['--config', '/path/to/config.json'];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.separator).toBeUndefined();
+    });
+
+    it('should preserve backward compatibility with no separator argument', () => {
+      const args = ['--config', '/path/to/config.json', '--debug'];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.configPath).toBe('/path/to/config.json');
+      expect(parsed.debug).toBe(true);
+      expect(parsed.separator).toBeUndefined();
+    });
+
+    it('should work with all other CLI options without separator', () => {
+      const args = [
+        '--config', '/path/to/config.json',
+        '--name', 'test-aggregator',
+        '--version', '2.0.0',
+        '--debug'
+      ];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.configPath).toBe('/path/to/config.json');
+      expect(parsed.name).toBe('test-aggregator');
+      expect(parsed.version).toBe('2.0.0');
+      expect(parsed.debug).toBe(true);
+      expect(parsed.separator).toBeUndefined();
+    });
+  });
+
+  describe('T017-T018: [US2] Parse --separator argument', () => {
+    it('T017: should parse --separator argument with space syntax', () => {
+      const args = ['--config', '/path/to/config.json', '--separator', '__'];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.configPath).toBe('/path/to/config.json');
+      expect(parsed.separator).toBe('__');
+    });
+
+    it('T018: should parse --separator=value format', () => {
+      const args = ['--config', '/path/to/config.json', '--separator=__'];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.configPath).toBe('/path/to/config.json');
+      expect(parsed.separator).toBe('__');
+    });
+
+    it('should parse --separator with dot', () => {
+      const args = ['--config', '/path/to/config.json', '--separator', '.'];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.separator).toBe('.');
+    });
+
+    it('should parse --separator with multi-character string', () => {
+      const args = ['--config', '/path/to/config.json', '--separator', '::'];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.separator).toBe('::');
+    });
+
+    it('should work with separator and other options', () => {
+      const args = [
+        '--config', '/path/to/config.json',
+        '--separator', '__',
+        '--debug',
+        '--name', 'my-aggregator'
+      ];
+      const parsed = parseCliArgs(args);
+
+      expect(parsed.configPath).toBe('/path/to/config.json');
+      expect(parsed.separator).toBe('__');
+      expect(parsed.debug).toBe(true);
+      expect(parsed.name).toBe('my-aggregator');
+    });
+  });
+
+  describe('T034-T036: [US3] validateSeparator tests', () => {
+    it('T034: should reject empty string separator', () => {
+      expect(() => validateSeparator('')).toThrow();
+      expect(() => validateSeparator('')).toThrow(/separator cannot be empty/i);
+      expect(() => validateSeparator('')).toThrow(/use --separator/i);
+    });
+
+    it('T035: should reject separator with whitespace characters', () => {
+      // Single space
+      expect(() => validateSeparator(' ')).toThrow();
+      expect(() => validateSeparator(' ')).toThrow(/separator cannot contain whitespace/i);
+
+      // Tab character
+      expect(() => validateSeparator('\t')).toThrow();
+      expect(() => validateSeparator('\t')).toThrow(/whitespace/i);
+
+      // Newline
+      expect(() => validateSeparator('\n')).toThrow();
+      expect(() => validateSeparator('\n')).toThrow(/whitespace/i);
+
+      // Multiple spaces
+      expect(() => validateSeparator('  ')).toThrow();
+      expect(() => validateSeparator('  ')).toThrow(/whitespace/i);
+
+      // Separator with space inside
+      expect(() => validateSeparator('_ _')).toThrow();
+      expect(() => validateSeparator('_ _')).toThrow(/whitespace/i);
+
+      // Separator with space at end
+      expect(() => validateSeparator('__ ')).toThrow();
+      expect(() => validateSeparator('__ ')).toThrow(/whitespace/i);
+
+      // Separator with space at start
+      expect(() => validateSeparator(' __')).toThrow();
+      expect(() => validateSeparator(' __')).toThrow(/whitespace/i);
+    });
+
+    it('T036: should accept valid multi-character separators', () => {
+      expect(() => validateSeparator('__')).not.toThrow();
+      expect(() => validateSeparator('::')).not.toThrow();
+      expect(() => validateSeparator('.')).not.toThrow();
+      expect(() => validateSeparator(':')).not.toThrow();
+      expect(() => validateSeparator('--')).not.toThrow();
+      expect(() => validateSeparator('->')).not.toThrow();
+      expect(() => validateSeparator('|')).not.toThrow();
+      expect(() => validateSeparator('/')).not.toThrow();
+    });
+
+    it('should accept single-character non-whitespace separators', () => {
+      expect(() => validateSeparator('_')).not.toThrow();
+      expect(() => validateSeparator('-')).not.toThrow();
+      expect(() => validateSeparator('|')).not.toThrow();
+      expect(() => validateSeparator('.')).not.toThrow();
+    });
+
+    it('should provide helpful error message for empty separator', () => {
+      try {
+        validateSeparator('');
+        throw new Error('Should have thrown');
+      } catch (error) {
+        expect((error as Error).message).toContain('empty');
+        expect((error as Error).message).toContain('--separator');
+        expect((error as Error).message).toContain('default: ":"');
+      }
+    });
+
+    it('should provide helpful error message for whitespace separator', () => {
+      try {
+        validateSeparator(' ');
+        throw new Error('Should have thrown');
+      } catch (error) {
+        expect((error as Error).message).toContain('whitespace');
+        expect((error as Error).message).toContain('__');
+        expect((error as Error).message).toContain('-');
+      }
     });
   });
 });

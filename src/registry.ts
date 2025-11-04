@@ -15,14 +15,16 @@
 
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { ToolRegistry, ToolRegistryEntry, ToolSchema } from './types.js';
+import { validateSeparator } from './index.js';
 
 /**
- * T074: Build tool registry from all child server clients
+ * T074 & T007: Build tool registry from all child server clients
  *
  * Aggregates tools from all connected child servers into a unified registry.
  * Each tool is prefixed with its server key to avoid naming conflicts.
  *
  * @param childClients - Map of server keys to MCP client connections
+ * @param separator - Separator string for namespacing (default: ':')
  * @returns Promise resolving to populated tool registry
  *
  * @example
@@ -30,12 +32,16 @@ import type { ToolRegistry, ToolRegistryEntry, ToolSchema } from './types.js';
  *   ['filesystem', fsClient],
  *   ['postgres', pgClient]
  * ]);
- * const registry = await buildToolRegistry(clients);
+ * const registry = await buildToolRegistry(clients, ':');
  * // registry contains 'filesystem:read_file', 'postgres:query', etc.
  */
 export async function buildToolRegistry(
-  childClients: Map<string, Client>
+  childClients: Map<string, Client>,
+  separator: string = ':'
 ): Promise<ToolRegistry> {
+  // T040-T041: Validate separator before building registry
+  validateSeparator(separator);
+
   const registry: ToolRegistry = new Map();
 
   // Fetch tools from all child servers in parallel
@@ -57,41 +63,43 @@ export async function buildToolRegistry(
 
   const results = await Promise.all(toolFetchPromises);
 
-  // Add tools from each server to registry
+  // T013: Add tools from each server to registry with separator parameter
   for (const { serverKey, client, tools } of results) {
     // Cast to ToolSchema[] since the MCP SDK returns the correct type
-    addServerTools(registry, serverKey, client, tools as ToolSchema[]);
+    addServerTools(registry, serverKey, client, tools as ToolSchema[], separator);
   }
 
   return registry;
 }
 
 /**
- * T075 & T078: Add tools from a server to the registry with prefix
+ * T075 & T078 & T008: Add tools from a server to the registry with prefix
  *
  * Adds all tools from a child server to the registry, prefixing each tool name
- * with the server key in the format: serverKey:toolName
+ * with the server key using the configurable separator.
  *
  * @param registry - The tool registry to update
  * @param serverKey - Unique identifier for the server (used as prefix)
  * @param client - MCP client connection to the server
  * @param tools - Array of tool schemas from the server
+ * @param separator - Separator string for namespacing (default: ':')
  *
  * @example
  * addServerTools(registry, 'filesystem', client, [
  *   { name: 'read_file', description: '...', inputSchema: {...} }
- * ]);
+ * ], ':');
  * // Adds 'filesystem:read_file' to registry
  */
 export function addServerTools(
   registry: ToolRegistry,
   serverKey: string,
   client: Client,
-  tools: ToolSchema[]
+  tools: ToolSchema[],
+  separator: string = ':'
 ): void {
   for (const tool of tools) {
-    // T078: Implement prefixing logic using serverKey:toolName format
-    const prefixedName = `${serverKey}:${tool.name}`;
+    // T078: Implement prefixing logic using configurable separator
+    const prefixedName = `${serverKey}${separator}${tool.name}`;
 
     // Create registry entry
     const entry: ToolRegistryEntry = {
@@ -109,23 +117,25 @@ export function addServerTools(
 }
 
 /**
- * T076: Remove all tools from a crashed server
+ * T076 & T009: Remove all tools from a crashed server
  *
  * Removes all tools belonging to a specific server from the registry.
  * This is called when a child server crashes or becomes unavailable.
  *
  * @param registry - The tool registry to update
  * @param serverKey - The server whose tools should be removed
+ * @param separator - Separator string for namespacing (default: ':')
  *
  * @example
- * removeServerTools(registry, 'postgres');
+ * removeServerTools(registry, 'postgres', ':');
  * // Removes all tools with 'postgres:' prefix
  */
 export function removeServerTools(
   registry: ToolRegistry,
-  serverKey: string
+  serverKey: string,
+  separator: string = ':'
 ): void {
-  const prefix = `${serverKey}:`;
+  const prefix = `${serverKey}${separator}`;
 
   // Find and remove all tools with this server's prefix
   const keysToRemove: string[] = [];
