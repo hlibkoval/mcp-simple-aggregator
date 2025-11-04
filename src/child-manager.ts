@@ -1,5 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import path from 'path';
+import fs from 'fs';
 import type {
   McpConfig,
   ServerConfig,
@@ -12,6 +14,58 @@ import {
   ErrorPhase
 } from './types.js';
 import { removeServerTools } from './registry.js';
+
+/**
+ * Resolves node-related commands to absolute paths
+ * @param command - The command from ServerConfig (e.g., "node", "npm", "npx", "/usr/bin/python")
+ * @returns Resolved absolute path or original command if not resolvable
+ *
+ * Resolution Rules:
+ * - "node" → process.execPath (always)
+ * - "npm"/"npx" → Same directory as process.execPath if exists, else original
+ * - Absolute paths (start with / or C:\) → No change
+ * - All other commands → No change (use system PATH)
+ */
+export function resolveCommand(command: string): string {
+  // Preserve absolute paths unchanged
+  if (path.isAbsolute(command)) {
+    return command;
+  }
+
+  // Resolve "node" to parent's node executable
+  if (command === 'node') {
+    const resolved = process.execPath;
+    console.log(`[INFO] Resolved '${command}' to '${resolved}'`);
+    return resolved;
+  }
+
+  // Resolve "npm" or "npx" to same directory as parent's node
+  if (command === 'npm' || command === 'npx') {
+    const nodeDir = path.dirname(process.execPath);
+
+    // Windows: Check for .cmd extension first
+    if (process.platform === 'win32') {
+      const cmdPath = path.join(nodeDir, `${command}.cmd`);
+      if (fs.existsSync(cmdPath)) {
+        console.log(`[INFO] Resolved '${command}' to '${cmdPath}'`);
+        return cmdPath;
+      }
+    }
+
+    // Unix or Windows fallback: No extension
+    const unixPath = path.join(nodeDir, command);
+    if (fs.existsSync(unixPath)) {
+      console.log(`[INFO] Resolved '${command}' to '${unixPath}'`);
+      return unixPath;
+    }
+
+    // Fallback: Use original command (rely on PATH)
+    return command;
+  }
+
+  // All other commands remain unchanged
+  return command;
+}
 
 /**
  * T048: Create an MCP client instance for connecting to a child server
@@ -65,8 +119,11 @@ export async function connectToChild(
       mergedEnv[key] = value;
     }
 
+    // Resolve command to absolute path if it's "node", "npm", or "npx"
+    const resolvedCommand = resolveCommand(config.command);
+
     const transport = new StdioClientTransport({
-      command: config.command,
+      command: resolvedCommand,
       args: config.args || [],
       env: mergedEnv
     });
