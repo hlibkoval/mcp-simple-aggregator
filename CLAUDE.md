@@ -115,8 +115,43 @@ The aggregator automatically resolves `node`, `npm`, and `npx` commands to absol
 - `"node"` → `process.execPath` (parent's Node.js)
 - `"npm"` / `"npx"` → Same directory as Node.js (if exists), with Windows `.cmd` support
 - Prevents "spawn ENOENT" errors in environments where PATH is not configured
-- Logs resolved paths with `[INFO]` prefix for debugging
+- Logs resolved paths to file when `--debug` is enabled
 - Absolute paths in config are never modified
+
+### Debug Logging
+
+**Feature 003**: File-based debug logging that prevents JSON-RPC stdio pollution
+
+**Usage**:
+```bash
+# Enable debug logging with default log file (/tmp/mcp-aggregator-{pid}.log)
+mcp-simple-aggregator --config config.json --debug
+
+# Enable debug logging with custom log file
+mcp-simple-aggregator --config config.json --debug --log-file /var/log/mcp.log
+```
+
+**Key Behaviors**:
+- **Without `--debug`**: No logging occurs (completely silent, clean stdio for JSON-RPC)
+- **With `--debug`**: Debug logs written to file only, stdio remains clean
+- **Log format**: `{ISO timestamp} [LEVEL] {message}` (e.g., `2025-11-04T15:18:05.880Z [INFO] Child server initialized`)
+- **Log levels**: `[DEBUG]`, `[INFO]`, `[ERROR]`
+- **Fatal errors**: Pre-transport errors still use `console.error()` (acceptable exception)
+
+**Why File-Based Logging**:
+- MCP protocol uses stdio transport (stdout/stderr for JSON-RPC messages)
+- Any non-JSON output on stdio breaks the protocol
+- Claude Desktop would show errors like "Unexpected token 'I', "[INFO] Erro"... is not valid JSON"
+- File-based logging keeps stdio clean while enabling troubleshooting
+
+**Troubleshooting**:
+```bash
+# Watch debug logs in real-time
+tail -f /tmp/mcp-aggregator-{pid}.log
+
+# Check for errors in logs
+grep ERROR /tmp/mcp-aggregator-*.log
+```
 
 ## Test Organization
 
@@ -160,3 +195,10 @@ Releases are automated via GitHub Actions:
 4. GitHub Action automatically publishes to npm and creates GitHub release with CHANGELOG notes
 
 The CI check in `prepublishOnly` prevents accidental manual publishes.
+
+## Active Technologies
+- TypeScript 5.3+ (Node.js 18+) + @modelcontextprotocol/sdk (stdio transport), tsup (build), vitest (testing) (003-fix-stdio-logging)
+- File-based debug logs (when --debug enabled) (003-fix-stdio-logging)
+
+## Recent Changes
+- 003-fix-stdio-logging: Added TypeScript 5.3+ (Node.js 18+) + @modelcontextprotocol/sdk (stdio transport), tsup (build), vitest (testing)

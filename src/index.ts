@@ -5,7 +5,7 @@ import { readConfigFile, parseConfig, expandConfigEnvVars } from './config.js';
 import { initializeChildren, setupErrorHandlers } from './child-manager.js';
 import { buildToolRegistry } from './registry.js';
 import { createAggregatorServer, startServer, setupToolCallHandler } from './server.js';
-import { setDebugMode, logDebug, logInfo } from './logger.js';
+import { setDebugMode, setLogFile, logDebug } from './logger.js';
 
 /**
  * T058: Parse command-line arguments
@@ -32,6 +32,13 @@ export function parseCliArgs(argv: string[] = process.argv.slice(2)): CliArgs {
       args.configPath = arg.substring('--config='.length);
     } else if (arg === '--debug') {
       args.debug = true;
+    } else if (arg === '--log-file') {
+      const nextArg = argv[++i];
+      if (nextArg) {
+        args.logFile = nextArg;
+      }
+    } else if (arg.startsWith('--log-file=')) {
+      args.logFile = arg.substring('--log-file='.length);
     } else if (arg === '--name') {
       const nextArg = argv[++i];
       if (nextArg) {
@@ -77,20 +84,24 @@ Usage:
   mcp-simple-aggregator --config <path> [options]
 
 Required Arguments:
-  --config <path>     Path to MCP configuration JSON file
+  --config <path>       Path to MCP configuration JSON file
 
 Optional Arguments:
-  --debug             Enable debug logging
-  --name <name>       Server name (default: mcp-simple-aggregator)
-  --version <ver>     Server version (default: 1.0.0)
-  --help, -h          Show this help message
+  --debug               Enable debug logging
+  --log-file <path>     Path to log file (default: /tmp/mcp-aggregator-{pid}.log)
+  --name <name>         Server name (default: mcp-simple-aggregator)
+  --version <ver>       Server version (default: 1.0.0)
+  --help, -h            Show this help message
 
 Examples:
   # Basic usage
   mcp-simple-aggregator --config /path/to/config.json
 
   # With debug logging
-  mcp-simple-aggregator --config config.json --debug
+  mcp-simple-aggregator --config /path/to/config.json --debug
+
+  # With custom log file
+  mcp-simple-aggregator --config /path/to/config.json --debug --log-file /var/log/mcp.log
 
   # Custom server name
   mcp-simple-aggregator --config config.json --name my-aggregator
@@ -125,6 +136,12 @@ async function main() {
 
     // Set debug mode for logger
     setDebugMode(args.debug || false);
+
+    // Initialize log file if debug mode is enabled
+    if (args.debug) {
+      const logFilePath = args.logFile || `/tmp/mcp-aggregator-${process.pid}.log`;
+      setLogFile(logFilePath);
+    }
 
     logDebug('[DEBUG] Starting MCP Simple Aggregator');
     logDebug('[DEBUG] Config path:', args.configPath);
@@ -174,12 +191,12 @@ async function main() {
     logDebug('[DEBUG] Starting MCP server on stdio...');
     await startServer(server);
 
-    logInfo('Aggregator server started successfully');
-    logInfo(`Serving ${children.size} child servers with ${registry.size} tools`);
+    logDebug(`[DEBUG] Aggregator server started successfully`);
+    logDebug(`[DEBUG] Serving ${children.size} child servers with ${registry.size} tools`);
 
     // Keep process running
     process.on('SIGINT', async () => {
-      logInfo('\nShutting down...');
+      logDebug('[DEBUG] Shutting down...');
       process.exit(0);
     });
 

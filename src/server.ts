@@ -22,7 +22,6 @@ import {
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { ToolRegistry, ToolSchema } from './types.js';
 import { removeServerTools } from './registry.js';
-import { logInfo } from './logger.js';
 
 /**
  * Server configuration options
@@ -143,7 +142,7 @@ function setupCrashHandlers(
 export async function startServer(server: Server): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logInfo('[INFO] MCP Aggregator Server started on stdio');
+  // Server started - no logging to prevent stdio pollution
 }
 
 /**

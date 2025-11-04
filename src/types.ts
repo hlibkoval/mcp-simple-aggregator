@@ -206,6 +206,9 @@ export interface CliArgs {
   /** Optional: Enable debug logging (default: false) */
   debug?: boolean;
 
+  /** Optional: Path to log file for debug output (default: /tmp/mcp-aggregator-{pid}.log) */
+  logFile?: string;
+
   /** Optional: Server name for MCP protocol (default: "mcp-simple-aggregator") */
   name?: string;
 
