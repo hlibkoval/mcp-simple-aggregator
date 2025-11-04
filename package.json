@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "bin": {
-    "mcp-simple-aggregator": "./dist/index.js"
+    "mcp-simple-aggregator": "dist/index.js"
   },
   "files": [
     "dist",
@@ -19,7 +19,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit",
-    "clean": "rm -rf dist coverage"
+    "clean": "rm -rf dist coverage",
+    "prepublishOnly": "npm run build && vitest --run --exclude='**/*.bench.ts' && npm run lint"
   },
   "keywords": [
     "mcp",
@@ -29,8 +30,16 @@
     "proxy",
     "tools"
   ],
-  "author": "",
+  "author": "Hlib Koval",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hlibkoval/mcp-simple-aggregator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hlibkoval/mcp-simple-aggregator/issues"
+  },
+  "homepage": "https://github.com/hlibkoval/mcp-simple-aggregator#readme",
   "engines": {
     "node": ">=18.0.0"
   },
