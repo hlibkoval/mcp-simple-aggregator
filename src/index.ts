@@ -195,6 +195,13 @@ async function main() {
 }
 
 // Run main if this is the entry point
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Check works for both direct execution and npm bin wrappers
+const isDirectExecution = process.argv[1] && (
+  import.meta.url === `file://${process.argv[1]}` ||
+  process.argv[1].includes('mcp-simple-aggregator') ||
+  process.argv[1].endsWith('index.js')
+);
+
+if (isDirectExecution && !process.env.VITEST) {
   main();
 }
